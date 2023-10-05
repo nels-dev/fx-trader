@@ -1,0 +1,13 @@
+python-dotenv
+pandas
+yfinance
+nasdaq-data-link
+matplotlib
+yahoofinancials
+pandas_ta
+tensorflow
+numpy
+scikit-learn
+ta-lib
+scikit-optimize
+scikeras[tensorflow]
