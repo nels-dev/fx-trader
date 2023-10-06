@@ -1,0 +1,5 @@
+yfinance
+nasdaq-data-link
+pandas_ta
+ta-lib
+boto3

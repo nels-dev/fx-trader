@@ -1,1 +1,4 @@
 .DS_Store
+lambda-functions/.venv
+lambda-functions/dependencies/*
+.env
