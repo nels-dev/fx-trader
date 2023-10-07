@@ -5,6 +5,7 @@ import * as events from 'aws-cdk-lib/aws-events';
 import * as targets from 'aws-cdk-lib/aws-events-targets'
 import * as s3 from 'aws-cdk-lib/aws-s3'
 import path = require('path');
+import { LambdaDestination } from 'aws-cdk-lib/aws-lambda-destinations';
 require('dotenv').config()
 
 export class InfrastructureStack extends cdk.Stack {
@@ -20,25 +21,43 @@ export class InfrastructureStack extends cdk.Stack {
       compatibleRuntimes: [lambda.Runtime.PYTHON_3_11],
     })
 
-    // Setup Lambda function - Fetch
-    const fetchDataFunction = new lambda.Function(this, 'FetchDataFunction', {
+    // Setup Lambda function - Features
+    const featuresFunction = new lambda.Function(this, 'FeaturesHandler', {
+      functionName: 'FeaturesHandler',
       runtime: lambda.Runtime.PYTHON_3_11, 
       handler: 'handler.handle',
-      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda-functions/fetch')),
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda-functions/features')),
       layers: [myDependenciesLayer, awsPandasLayer],      
-      timeout: cdk.Duration.seconds(180),
+      timeout: cdk.Duration.seconds(900),
       environment:{
-        BUCKET_NAME: bucketTrainingData.bucketName,
-        NASDAQ_API_KEY: process.env.NASDAQ_API_KEY || 'None'
+        BUCKET_NAME: bucketTrainingData.bucketName
       }
     })
 
-    bucketTrainingData.grantReadWrite(fetchDataFunction)
-
-    const fetchDailyRule = new events.Rule(this, 'FetchDailyRule', {
-      schedule: events.Schedule.cron({hour: '7', minute:'0', }, )
+    // Setup Lambda function - ETL
+    const etlFunction = new lambda.Function(this, 'ETLHandler', {
+      functionName: 'ETLHandler',
+      runtime: lambda.Runtime.PYTHON_3_11, 
+      handler: 'handler.handle',
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda-functions/etl')),
+      layers: [myDependenciesLayer, awsPandasLayer],      
+      timeout: cdk.Duration.seconds(900),
+      environment:{
+        BUCKET_NAME: bucketTrainingData.bucketName,
+        NASDAQ_API_KEY: process.env.NASDAQ_API_KEY || 'None'
+      },
+      onSuccess: new LambdaDestination(featuresFunction)
     })
 
-    fetchDailyRule.addTarget(new targets.LambdaFunction(fetchDataFunction))
+    
+
+    bucketTrainingData.grantReadWrite(etlFunction)
+    bucketTrainingData.grantReadWrite(featuresFunction)
+
+    const fetchDailyRule = new events.Rule(this, 'FetchDailyRule', {
+      schedule: events.Schedule.cron({hour: '0', minute:'15', }, )
+    })
+
+    fetchDailyRule.addTarget(new targets.LambdaFunction(etlFunction))
   }
 }
