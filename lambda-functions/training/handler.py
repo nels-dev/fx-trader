@@ -10,7 +10,7 @@ def handle(event, context):
     sagemaker_role_arn = os.environ['SAGEMAKRR_ROLE_ARN']
     
     training_data_uri = f"s3://{training_data_bucket_name}/"
-    training_script_uri = f"s3://{training_script_bucket_name}/"
+    training_script_uri = f"s3://{training_script_bucket_name}/training-script.tar.gz"
     training_output_uri = f"s3://{training_output_bucket_name}/"
     training_job_name = f"random-forest-train-{formatted_timestamp}"
 
@@ -19,7 +19,11 @@ def handle(event, context):
         "TrainingJobName": training_job_name,
         "AlgorithmSpecification": {
             "TrainingInputMode": "File",
-            "TrainingImage" : '246618743249.dkr.ecr.us-west-2.amazonaws.com/sagemaker-scikit-learn:0.23-1-cpu-py3'            
+            "TrainingImage" : '246618743249.dkr.ecr.us-west-2.amazonaws.com/sagemaker-scikit-learn:0.23-1-cpu-py3',
+            "MetricDefinitions": [
+                {"Name": "r2_score", "Regex": "R2 Score: ([-+]?[0-9.]+).*$"},
+                {"Name": "mse", "Regex": "Mean Squared Error: ([0-9.]+).*$"},
+            ],
         },
         "RoleArn": sagemaker_role_arn,
         "InputDataConfig": [

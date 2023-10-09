@@ -6,7 +6,7 @@ import * as targets from 'aws-cdk-lib/aws-events-targets'
 import * as s3 from 'aws-cdk-lib/aws-s3'
 import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment'
 import * as iam from 'aws-cdk-lib/aws-iam'
-import path = require('path');
+import * as path from 'path';
 import { LambdaDestination } from 'aws-cdk-lib/aws-lambda-destinations';
 require('dotenv').config()
 
@@ -80,6 +80,20 @@ export class InfrastructureStack extends cdk.Stack {
     const sagemakerRole = new iam.Role(this, 'sageMakerRole', {
       assumedBy: new iam.ServicePrincipal('sagemaker.amazonaws.com')
     });
+
+    sagemakerRole.addToPolicy(new iam.PolicyStatement({
+      resources: ['*'],
+      actions: [
+        'logs:CreateLogGroup',
+        'logs:CreateLogStream',
+        'logs:PutLogEvents',
+        'logs:DescribeLogStreams',
+        "cloudwatch:PutMetricData",
+        "cloudwatch:GetMetricData",
+        "cloudwatch:GetMetricStatistics",
+        "cloudwatch:ListMetrics",
+      ],
+    }));
 
     bucketTrainingData.grantRead(sagemakerRole)
     bucketTrainingScript.grantRead(sagemakerRole)
