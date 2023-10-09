@@ -11,10 +11,10 @@ def handle(event, context):
     bucket = os.environ['BUCKET_NAME']
     
     currency_config = ['CAD','AUD','EUR','GBP','NZD','CHF','JPY']
-    s3 = boto3.client('s3')
+    s3 = boto3.resource('s3')
     for ccy in currency_config:
         file_name = 'USD_' + ccy + '_market_data.csv'
-        obj = s3.get_object(Bucket=bucket, Key=file_name)
+        obj = s3.Bucket(bucket).Object(file_name).get()
         df = pd.read_csv(obj['Body'], parse_dates=[0], index_col=0)
         
         ## workaround for executing pandas_ta in lambda environment
@@ -28,5 +28,5 @@ def handle(event, context):
         df = df.dropna(axis='columns', how='all').fillna(method='ffill').dropna()
         csv_buffer = StringIO()
         df.to_csv(csv_buffer)
-        s3.upload_file(Bucket=bucket, Key='USD_' + ccy + '_features.csv', Body=csv_buffer.getvalue())
+        s3.Bucket(bucket).Object('USD_' + ccy + '_features.csv').put(Body=csv_buffer.getvalue())
         logger.info(ccy + " data uploaded")

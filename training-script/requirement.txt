@@ -1,0 +1,7 @@
+pandas
+tensorflow
+numpy
+scikit-learn
+scikit-optimize
+scikeras[tensorflow]
+joblib

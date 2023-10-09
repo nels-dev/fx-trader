@@ -1,5 +1,6 @@
 yfinance
 nasdaq-data-link
+pandas
 pandas_ta
 ta-lib
-boto3
+urllib3<2
