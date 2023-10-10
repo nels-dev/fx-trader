@@ -6,8 +6,10 @@ import * as targets from 'aws-cdk-lib/aws-events-targets'
 import * as s3 from 'aws-cdk-lib/aws-s3'
 import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment'
 import * as iam from 'aws-cdk-lib/aws-iam'
+import * as sagemaker from 'aws-cdk-lib/aws-sagemaker'
 import * as path from 'path';
 import { LambdaDestination } from 'aws-cdk-lib/aws-lambda-destinations';
+import { SageMakerUpdateEndpoint } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 require('dotenv').config()
 
 export class InfrastructureStack extends cdk.Stack {
@@ -117,6 +119,26 @@ export class InfrastructureStack extends cdk.Stack {
       resources: ['*'],
     })); 
     trainingFunction.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['iam:PassRole'],
+      resources: [sagemakerRole.roleArn],
+    })); 
+
+    const deployFunction = new lambda.Function(this,'DeployHandler',{
+      functionName: 'DeployHandler',
+      runtime: lambda.Runtime.PYTHON_3_8,
+      handler: 'handler.handle' ,
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda-functions/deploy')),
+      timeout: cdk.Duration.seconds(300),
+      environment:{
+        SAGEMAKRR_ROLE_ARN: sagemakerRole.roleArn
+      }
+    })
+
+    deployFunction.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['sagemaker:*'],
+      resources: ['*'],
+    })); 
+    deployFunction.addToRolePolicy(new iam.PolicyStatement({
       actions: ['iam:PassRole'],
       resources: [sagemakerRole.roleArn],
     })); 
