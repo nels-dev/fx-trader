@@ -24,11 +24,12 @@ if __name__ == "__main__":
     parser.add_argument('--max_features', type=str, default='auto')
     parser.add_argument('--min_samples_split', type=int, default=10)
     parser.add_argument('--min_samples_leaf', type=int, default=20)
+    parser.add_argument('--currency', type=str)
     args, _ = parser.parse_known_args()
 
     print('Args', args)
-
-    input_data = os.path.join(args.train, 'USD_CAD_features.csv')  
+    currency = args.currency
+    input_data = os.path.join(args.train, f'USD_{currency}_features.csv')  
     df = pd.read_csv(input_data, parse_dates=[0], index_col=0)
 
     df['1d_future'] = df['1d_delta'].shift(-1)

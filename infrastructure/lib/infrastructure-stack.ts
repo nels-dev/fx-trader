@@ -104,8 +104,9 @@ export class InfrastructureStack extends cdk.Stack {
     const trainingFunction = new lambda.Function(this, 'TrainingHandler', {
       functionName: 'TrainingHandler',
       runtime: lambda.Runtime.PYTHON_3_8,
-      handler: 'handler.handle',
+      handler: 'train_rf.handle',
       code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda-functions/training')),
+      timeout: cdk.Duration.seconds(900),
       environment:{
         TRAINING_DATA_BUCKET_NAME: bucketTrainingData.bucketName,
         TRAINING_SCRIPT_BUCKET_NAME: bucketTrainingScript.bucketName,
