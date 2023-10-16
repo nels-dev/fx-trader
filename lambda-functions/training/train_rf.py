@@ -46,7 +46,7 @@ def handle(event, context):
                 "S3OutputPath": training_output_uri
             },        
             "ResourceConfig": {
-                "InstanceType": "ml.m5.large",
+                "InstanceType": "ml.m5.xlarge",
                 "InstanceCount": 1,
                 "VolumeSizeInGB": 10
             },

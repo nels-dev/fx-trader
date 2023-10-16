@@ -94,6 +94,7 @@ export class InfrastructureStack extends cdk.Stack {
         "cloudwatch:GetMetricData",
         "cloudwatch:GetMetricStatistics",
         "cloudwatch:ListMetrics",
+        "ecr:*",
       ],
     }));
 
@@ -101,8 +102,8 @@ export class InfrastructureStack extends cdk.Stack {
     bucketTrainingScript.grantRead(sagemakerRole)
     bucketTrainingOutput.grantReadWrite(sagemakerRole)    
 
-    const trainingFunction = new lambda.Function(this, 'TrainingHandler', {
-      functionName: 'TrainingHandler',
+    const rfTrainingFunction = new lambda.Function(this, 'RF_TrainingHandler', {
+      functionName: 'RF_TrainingHandler',
       runtime: lambda.Runtime.PYTHON_3_8,
       handler: 'train_rf.handle',
       code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda-functions/training')),
@@ -115,19 +116,42 @@ export class InfrastructureStack extends cdk.Stack {
       }
     });
     
-    trainingFunction.addToRolePolicy(new iam.PolicyStatement({
+    rfTrainingFunction.addToRolePolicy(new iam.PolicyStatement({
       actions: ['sagemaker:CreateTrainingJob'],
       resources: ['*'],
     })); 
-    trainingFunction.addToRolePolicy(new iam.PolicyStatement({
+    rfTrainingFunction.addToRolePolicy(new iam.PolicyStatement({
       actions: ['iam:PassRole'],
       resources: [sagemakerRole.roleArn],
     })); 
 
-    const deployFunction = new lambda.Function(this,'DeployHandler',{
-      functionName: 'DeployHandler',
+    const lstmTrainingFunction = new lambda.Function(this, 'LSTM_TrainingHandler', {
+      functionName: 'LSTM_TrainingHandler',
       runtime: lambda.Runtime.PYTHON_3_8,
-      handler: 'handler.handle' ,
+      handler: 'train_lstm.handle',
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda-functions/training')),
+      timeout: cdk.Duration.seconds(900),
+      environment:{
+        TRAINING_DATA_BUCKET_NAME: bucketTrainingData.bucketName,
+        TRAINING_SCRIPT_BUCKET_NAME: bucketTrainingScript.bucketName,
+        TRAINING_OUTPUT_BUCKET_NAME: bucketTrainingOutput.bucketName,
+        SAGEMAKRR_ROLE_ARN: sagemakerRole.roleArn
+      }
+    });
+    
+    lstmTrainingFunction.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['sagemaker:CreateTrainingJob', 'sagemaker:CreateHyperParameterTuningJob'],
+      resources: ['*'],
+    })); 
+    lstmTrainingFunction.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['iam:PassRole'],
+      resources: [sagemakerRole.roleArn],
+    })); 
+
+    const rfDeployFunction = new lambda.Function(this,'RF_DeployHandler',{
+      functionName: 'RF_DeployHandler',
+      runtime: lambda.Runtime.PYTHON_3_8,
+      handler: 'deploy_rf.handle' ,
       code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda-functions/deploy')),
       timeout: cdk.Duration.seconds(300),
       environment:{
@@ -135,13 +159,34 @@ export class InfrastructureStack extends cdk.Stack {
       }
     })
 
-    deployFunction.addToRolePolicy(new iam.PolicyStatement({
+    rfDeployFunction.addToRolePolicy(new iam.PolicyStatement({
       actions: ['sagemaker:*'],
       resources: ['*'],
     })); 
-    deployFunction.addToRolePolicy(new iam.PolicyStatement({
+    rfDeployFunction.addToRolePolicy(new iam.PolicyStatement({
       actions: ['iam:PassRole'],
       resources: [sagemakerRole.roleArn],
     })); 
+
+    const lstmDeployFunction = new lambda.Function(this,'LSTM_DeployHandler',{
+      functionName: 'LSTM_DeployHandler',
+      runtime: lambda.Runtime.PYTHON_3_8,
+      handler: 'deploy_lstm.handle' ,
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda-functions/deploy')),
+      timeout: cdk.Duration.seconds(300),
+      environment:{
+        SAGEMAKRR_ROLE_ARN: sagemakerRole.roleArn
+      }
+    })
+
+    lstmDeployFunction.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['sagemaker:*'],
+      resources: ['*'],
+    })); 
+    lstmDeployFunction.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['iam:PassRole'],
+      resources: [sagemakerRole.roleArn],
+    })); 
+    
   }
 }

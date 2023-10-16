@@ -43,7 +43,7 @@ def uploadToS3(bucket, buffer, ccy):
 
 def fetchDataForCurrency(ccy, inf_dataset):
     
-    # Download macroeconomic data from 
+    # Download macroeconomic data from NASDAQ
     fed_rates = nasdaqdatalink.get("FED/RIFSPFF_N_D")
     fed_rates = fed_rates['2004-01-01':]
     fccy_inflation_rate = nasdaqdatalink.get(inf_dataset)
