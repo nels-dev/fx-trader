@@ -4,3 +4,4 @@ pandas
 pandas_ta
 ta-lib
 urllib3<2
+pymongo

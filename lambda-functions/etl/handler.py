@@ -46,10 +46,10 @@ def fetchDataForCurrency(ccy, inf_dataset):
     # Download macroeconomic data from NASDAQ
     fed_rates = nasdaqdatalink.get("FED/RIFSPFF_N_D")
     fed_rates = fed_rates['2004-01-01':]
-    fccy_inflation_rate = nasdaqdatalink.get(inf_dataset)
-    fccy_inflation_rate = fccy_inflation_rate['2003-11-30':]
-    usa_inflation_rate = nasdaqdatalink.get("RATEINF/INFLATION_USA")
-    usa_inflation_rate = usa_inflation_rate['2003-11-30':]
+    #fccy_inflation_rate = nasdaqdatalink.get(inf_dataset)
+    #fccy_inflation_rate = fccy_inflation_rate['2003-11-30':]
+    #usa_inflation_rate = nasdaqdatalink.get("RATEINF/INFLATION_USA")
+    #usa_inflation_rate = usa_inflation_rate['2003-11-30':]
 
     ticker = yf.Ticker(ccy+ '=X')
     hist = ticker.history(period='max')
@@ -61,16 +61,11 @@ def fetchDataForCurrency(ccy, inf_dataset):
 
     hist.index = hist.index.date
 
-    combined = hist \
-        .merge(fed_rates, how='outer', left_index=True, right_index=True, suffixes=(None, "_fed")) \
-        .merge(usa_inflation_rate, how='outer', left_index=True, right_index=True, suffixes=(None, "_usa_inf")) \
-        .merge(fccy_inflation_rate, how='outer', left_index=True, right_index=True, suffixes=(None, "_fccy_inf"))
+    combined = hist.merge(fed_rates, how='outer', left_index=True, right_index=True, suffixes=(None, "_fed"))
 
-    combined.rename(columns={'Value':'fed_rate', 'Value_usa_inf':'usa_inf','Value_fccy_inf':'fccy_inf'}, inplace=True)
+    combined.rename(columns={'Value':'fed_rate'}, inplace=True)
     # forward-fill fields with no data
-    combined['fed_rate'].fillna(method='ffill', inplace=True)
-    combined['usa_inf'].fillna(method='ffill', inplace=True)
-    combined['fccy_inf'].fillna(method='ffill', inplace=True)
+    combined['fed_rate'].fillna(method='ffill', inplace=True)    
 
     df=combined.copy().dropna()
     return df

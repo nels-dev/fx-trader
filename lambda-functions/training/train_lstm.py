@@ -18,7 +18,7 @@ def handle(event, context):
         training_data_uri = f"s3://{training_data_bucket_name}/"
         training_script_uri = f"s3://{training_script_bucket_name}/training-script.tar.gz"
         training_output_uri = f"s3://{training_output_bucket_name}/{currency}"        
-        tuning_job_name = f"lstm-model-tuning-v1-{currency}"
+        tuning_job_name = f"lstm-model-tuning-v2-{currency}"
 # Baseline config        
 #    "HyperParameters": {
 #                 "units_layer1": "128", 
@@ -47,12 +47,7 @@ def handle(event, context):
                             "Name":"units_layer1",
                             "MinValue": "64",
                             "MaxValue": "256"
-                        },
-                        {
-                            "Name":"units_dense1",
-                            "MinValue": "16",
-                            "MaxValue": "64"
-                        }, 
+                        },                         
                         {
                             "Name":"batch_size",
                             "MinValue": "16",
@@ -66,7 +61,7 @@ def handle(event, context):
                         {
                             "Name":"epoch",
                             "MinValue": "10",
-                            "MaxValue": "50"
+                            "MaxValue": "30"
                         },  
                     ],
                     "ContinuousParameterRanges": [                        
@@ -75,7 +70,13 @@ def handle(event, context):
                             "MinValue": "0.1",
                             "MaxValue": "0.3"
                         }
-                    ],                    
+                    ],
+                    "CategoricalParameterRanges":[
+                        {
+                            "Name":"units_dense1",
+                            "Values":['0', '32', '64']
+                        }
+                    ]                    
                 }
             },
             "TrainingJobDefinition": {

@@ -8,13 +8,12 @@ from keras.layers import Dense
 from keras.layers import Dropout
 from keras.metrics import MeanSquaredError
 from keras.backend import sum, square, mean
+from keras.models import load_model
 from sklearn.preprocessing import StandardScaler
-from joblib import dump, load
 
 # inference functions ---------------
-def model_fn(model_dir):
-    clf = load(os.path.join(model_dir, "model.joblib"))
-    return clf
+def model_fn(model_dir):    
+    return load_model(os.path.join(model_dir, '1'))
 
 class BaseLSTMModel():
     def r2_score(y_true, y_pred):
@@ -35,7 +34,8 @@ class BaseLSTMModel():
     def fit(self, X, y):       
         self.model = Sequential()
         self.model.add(LSTM(self.units_layer1, self.activation, input_shape=(X.shape[1], X.shape[2]), return_sequences=False))
-        self.model.add(Dense(self.units_dense1))
+        if (self.units_dense1 > 0):
+            self.model.add(Dense(self.units_dense1))
         self.model.add(Dropout(self.dropout_rate))
         self.model.add(Dense(1))
         self.model.compile(loss='mean_squared_error', optimizer='adam', metrics=[BaseLSTMModel.r2_score, MeanSquaredError()]) 
@@ -77,6 +77,7 @@ if __name__ == "__main__":
 
     df['1d_future'] = df['1d_delta'].shift(-1)
     df.dropna(inplace=True)
+    df.apply()
 
     ## Prepare data for model training
 
@@ -126,4 +127,4 @@ if __name__ == "__main__":
 
     print(f'Mean Squared Error: {mse:.6f}')
     print(f'R2 Score: {r2:.6f}')
-    dump(model, os.path.join(args.model_dir, 'model.joblib'))
+    model.model.save(os.path.join(args.model_dir, '1'))
