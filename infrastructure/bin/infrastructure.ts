@@ -3,6 +3,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { InfrastructureStack } from '../lib/infrastructure-stack';
 import { ModelDeploymentStack } from '../lib/model-deployment-stack';
+import {ApplicationStack} from "../lib/application-stack";
 
 const app = new cdk.App();
 const infrastructureStack = new InfrastructureStack(app, 'InfrastructureStack', {
@@ -22,4 +23,6 @@ const infrastructureStack = new InfrastructureStack(app, 'InfrastructureStack', 
 });
 
 const modelDeploymentStack = new ModelDeploymentStack(app, 'ModelDeploymentStack', {})
+
+const applicationStack = new ApplicationStack(app, 'ApplicationStack', {})
 modelDeploymentStack.addDependency(infrastructureStack)
