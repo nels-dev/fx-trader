@@ -28,6 +28,7 @@ jobs:
         with:
           registry-type: public
       - name: Build, tag, and push image to Amazon ECR
+        id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: h7u1f7w9/fx-assist-backend-repository
