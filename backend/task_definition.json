@@ -1,5 +1,4 @@
 {
-    "taskDefinition": {
         "containerDefinitions": [
             {
                 "name": "Application",
@@ -15,6 +14,4 @@
             }
         ],
         "family": "ApplicationStackFxAssistBackendTask"
-    },
-    "tags": []
 }
