@@ -7,6 +7,7 @@ import lombok.Value;
 @Value
 public class LoginResponse {
   boolean success;
+  String firstName;
   String lastName;
   String accessToken;
 }

@@ -8,5 +8,6 @@ import lombok.Value;
 @Value
 @AllArgsConstructor
 public class ApplicationError {
-  String reason;
+  String error;
+  String message;
 }

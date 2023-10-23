@@ -16,54 +16,57 @@ import java.time.OffsetDateTime;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserService implements UserDetailsService {
   private final UserRepository userRepository;
   private final JwtConfig jwtConfig;
   private final PasswordEncoder passwordEncoder;
+
   @SneakyThrows
   public LoginResponse authenticate(LoginRequest loginRequest) {
     try {
-      User user = userRepository.findByEmail(loginRequest.getEmail())
-                                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+      User user =
+          userRepository
+              .findByEmail(loginRequest.getEmail())
+              .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
       if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
         throw new BadCredentialsException("Password not match");
       }
 
-      JWTClaimsSet claimsSet = new JWTClaimsSet.Builder().subject(user.getEmail())
-                                                         .issueTime(new Date())
-                                                         .expirationTime(Date.from(OffsetDateTime.now()
-                                                                                                 .plusDays(1)
-                                                                                                 .toInstant()))
-                                                         .build();
+      JWTClaimsSet claimsSet =
+          new JWTClaimsSet.Builder()
+              .subject(user.getEmail())
+              .issueTime(new Date())
+              .expirationTime(Date.from(OffsetDateTime.now().plusDays(1).toInstant()))
+              .build();
       SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), claimsSet);
       signedJWT.sign(new MACSigner(jwtConfig.getSecretKey()));
       String accessToken = signedJWT.serialize();
       return LoginResponse.builder()
-                          .success(true)
-                          .lastName(user.getLastName())
-                          .accessToken(accessToken)
-                          .build();
-    }catch(AuthenticationException e){
-      //Failed authentication
-      return LoginResponse.builder()
-                          .success(false)
-                          .build();
+          .success(true)
+          .firstName(user.getFirstName())
+          .lastName(user.getLastName())
+          .accessToken(accessToken)
+          .build();
+    } catch (AuthenticationException e) {
+      // Failed authentication
+      return LoginResponse.builder().success(false).build();
     }
   }
 
   public void register(UserRegistrationRequest request) throws UserAlreadyExistException {
-    if(userRepository.existsByUsernameAndEmail(request.getUserName(), request.getEmail())){
+    if (userRepository.existsByUsernameAndEmail(request.getUserName(), request.getEmail())) {
       throw new UserAlreadyExistException();
     }
 
@@ -74,5 +77,18 @@ public class UserService {
     user.setEmail(request.getEmail());
     user.setPassword(passwordEncoder.encode(request.getPassword()));
     userRepository.save(user);
+  }
+
+  @Override
+  public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    return userRepository
+        .findByEmail(email)
+        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+  }
+
+  public User getCurrentUser() {
+    return userRepository
+        .findByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
+        .orElse(null);
   }
 }

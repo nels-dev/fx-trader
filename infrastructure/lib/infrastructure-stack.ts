@@ -51,7 +51,8 @@ export class InfrastructureStack extends cdk.Stack {
 
     this.setupLstmTrainingFunction(bucketTrainingData, bucketTrainingScript, bucketTrainingOutput, sagemakerRole); 
 
-    
+    // Setup quote fetcher function
+    this.setupQuoteFetcherFunction(myDependenciesLayer);
 
     // Export variables for use in other stacks
     new cdk.CfnOutput(this, 'SagemakerRoleArn', {
@@ -227,5 +228,31 @@ export class InfrastructureStack extends cdk.Stack {
     }));
     bucketTrainingData.grantRead(predictFunction);
     return predictFunction
+  }
+
+  private setupQuoteFetcherFunction(myDependenciesLayer: lambda.ILayerVersion) {
+    const quoteFetcherFunction = new lambda.Function(this, 'quoteFetchHandler', {
+      functionName: 'quoteFetchHandler',
+      runtime: lambda.Runtime.PYTHON_3_8,
+      handler: 'fetcher.handle',
+      layers: [myDependenciesLayer],
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda-functions/quote')),
+      memorySize: 128,
+      timeout: cdk.Duration.seconds(300),
+      environment: {        
+        MONGO_HOST: 'main.0k9qtgy.mongodb.net',
+        MONGO_USERNAME: 'fx-trader-app-user',
+        MONGO_PASSWORD: process.env.MONGO_PASSWORD || 'None',
+        MONGO_DB_NAME: 'main',
+        FIXER_API_KEY: process.env.FIXER_API_KEY || 'None',
+      }
+    });
+
+    const fetchQuotesHourlyRule = new events.Rule(this, 'FetchHourlyRule', {
+      schedule: events.Schedule.cron({ minute: '20', })
+    });
+
+    fetchQuotesHourlyRule.addTarget(new targets.LambdaFunction(quoteFetcherFunction));
+    return quoteFetcherFunction
   }
 }

@@ -18,5 +18,4 @@ public class JwtConfig {
     byte[] decodedKey = Base64.getDecoder().decode(secret);
     return new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
   }
-
 }
