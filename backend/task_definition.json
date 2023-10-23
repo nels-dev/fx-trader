@@ -2,16 +2,32 @@
         "containerDefinitions": [
             {
                 "name": "Application",
-                "image": "public.ecr.aws/h7u1f7w9/fx-assist-backend-repository",
+                "image": "public.ecr.aws/h7u1f7w9/fx-assist-backend-repository:latest",
+                "cpu": 512,
                 "memory": 512,
                 "portMappings": [
                     {
                         "containerPort": 8080,
-                        "hostPort": 80,
-                        "protocol": "tcp"
+                        "hostPort": 80
                     }
-                ]
+                ],
+                "environment": [
+                    {
+                        "name": "MONGODB_PASSWORD",
+                        "value": ""
+                    }
+                ],
+                "logConfiguration": {
+                    "logDriver": "awslogs",
+                    "options": {
+                        "awslogs-group": "/application/FxAssistBackend",
+                        "awslogs-region": "us-west-2",
+                        "awslogs-stream-prefix": "backend"
+                    }
+                }
             }
         ],
         "family": "ApplicationStackFxAssistBackendTask"
 }
+
+
