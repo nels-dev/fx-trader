@@ -1,0 +1,20 @@
+{
+    "taskDefinition": {
+        "containerDefinitions": [
+            {
+                "name": "Application",
+                "image": "public.ecr.aws/h7u1f7w9/fx-assist-backend-repository",
+                "memory": 512,
+                "portMappings": [
+                    {
+                        "containerPort": 8080,
+                        "hostPort": 80,
+                        "protocol": "tcp"
+                    }
+                ]
+            }
+        ],
+        "family": "ApplicationStackFxAssistBackendTask"
+    },
+    "tags": []
+}

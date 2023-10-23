@@ -27,6 +27,7 @@ export class ApplicationStack extends cdk.Stack {
     })
 
     const taskDefinition = new ecs.Ec2TaskDefinition(this, 'FxAssistBackendTask', {
+
     });
     const container = taskDefinition.addContainer('Application',{
       image: ecs.ContainerImage.fromRegistry(ecrPublicRepository.repositoryName||'None', {}),
