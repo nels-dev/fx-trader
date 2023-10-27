@@ -53,7 +53,7 @@ public class SecurityConfig {
     configuration.setAllowedOriginPatterns(
         Arrays.asList("http://localhost:[*]", "https://*.nels-dev.github.io"));
     configuration.setAllowedMethods(List.of("*"));
-
+    configuration.setAllowedHeaders(List.of("*"));
     UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource =
         new UrlBasedCorsConfigurationSource();
     urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", configuration);
