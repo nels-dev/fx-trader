@@ -3,6 +3,7 @@ package com.github.nelsdev.fxassist.config;
 import static org.springframework.security.config.Customizer.*;
 
 import java.util.Arrays;
+import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -50,7 +51,9 @@ public class SecurityConfig {
   CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.setAllowedOriginPatterns(
-        Arrays.asList("http://localhost", "https://*.nels-dev.github.io"));
+        Arrays.asList("http://localhost:[*]", "https://*.nels-dev.github.io"));
+    configuration.setAllowedMethods(List.of("*"));
+
     UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource =
         new UrlBasedCorsConfigurationSource();
     urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", configuration);
