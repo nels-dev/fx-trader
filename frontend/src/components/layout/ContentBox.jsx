@@ -3,8 +3,7 @@ const ContentBox = ({title, children}) => {
     return ( 
     <Paper elevation={2} sx={{height:'100%'}} >
         <Box sx={{p:3}}>
-        <Typography variant="h6" fontWeight={700} color='primary'>{title}</Typography>
-        <Divider sx={{ mt: 1, mb: 2 }} />
+        <Typography gutterBottom variant="h6" fontWeight={700} color='primary'>{title}</Typography>
         {children}
         </Box>
     </Paper> );

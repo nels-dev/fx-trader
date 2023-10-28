@@ -6,8 +6,7 @@ import { formatAmount } from "../../utils/number.utils";
 import ContentBox from "../layout/ContentBox";
 const BalanceTable = ({ balances }) => {
     const [curBalances, setCurBalances] = useState(balances)
-    useEffect(() => {
-        console.log(balances)
+    useEffect(() => {        
         if (!balances) {
             getPortfolio()
                 .then(({ data }) => { setCurBalances(data.balances) })

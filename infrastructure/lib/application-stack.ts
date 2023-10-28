@@ -62,11 +62,12 @@ export class ApplicationStack extends cdk.Stack {
     new cloudfront.Distribution(this, 'cfDistribution', {
       defaultBehavior:{
         origin: new origins.LoadBalancerV2Origin(alb, {
-          protocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY
+          protocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
         }),
         allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
         cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
-        originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER
+        originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER,
+        responseHeadersPolicy: cloudfront.ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS_WITH_PREFLIGHT
       }
     })
 

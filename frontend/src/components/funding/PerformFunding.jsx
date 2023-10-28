@@ -42,8 +42,8 @@ const PerformFunding = () => {
         return (
             <Grid container spacing={3}>
                 <Grid sm={12} md={7}>
-                    <Card sx={{ backgroundColor: 'primary.light',  height: "100%" }} onClick={() => setSelectedType('DEPOSIT')}>
-                        <CardActionArea sx={{ p: 3, textAlign: 'center',height: "100%"}}>
+                    <Card sx={{ backgroundColor: 'primary.light', height: "100%" }} onClick={() => setSelectedType('DEPOSIT')}>
+                        <CardActionArea sx={{ p: 3, textAlign: 'center', height: "100%" }}>
                             <AccountBalanceWalletIcon sx={{ fontSize: 60, color: "primary.contrastText" }} />
 
                             <Typography gutterBottom variant="h4" color="primary.contrastText">Fund your portfolio</Typography>
@@ -54,7 +54,7 @@ const PerformFunding = () => {
                     </Card>
                 </Grid>
                 <Grid sm={12} md={5}>
-                    <Card variant="outlined" sx={{ textAlign: 'center', height: "100%"}} onClick={() => setSelectedType('WITHDRAWAL')}>
+                    <Card variant="outlined" sx={{ textAlign: 'center', height: "100%" }} onClick={() => setSelectedType('WITHDRAWAL')}>
                         <CardActionArea sx={{ p: 3, textAlign: 'center' }}>
                             <LogoutIcon sx={{ fontSize: 60, color: "secondary" }} />
 
@@ -76,31 +76,32 @@ const PerformFunding = () => {
                 </Grid>
                 <Grid sm={12} md={8}>
                     <ContentBox title='Add Fund'>
-                        <InputLabel id="label-currency">Currency</InputLabel>
-                        <Select
-                            labelId="label-currency"
-                            margin="normal"
-                            label="Currency"
-                            fullWidth
-                            value={form.currency}
-                            onChange={({ target: { value } }) => setForm({ ...form, currency: value })}>
-                            <MenuItem value=''><em>Select currency</em></MenuItem>
-                            {portf.allowedCurrencies.map(cur => (<MenuItem value={cur}>{cur}</MenuItem>))}
-                        </Select>
-                        <TextField
-                            margin="normal"
-                            required
-                            fullWidth
-                            label="Amount"
-                            value={form.amount}
-                            onChange={({ target: { value } }) => setForm({ ...form, amount: value })}
-                        />
-                        <Button variant="contained" color="primary" onClick={submitDeposit} sx={{ mr: 3, mt: 3 }}>Submit</Button>
-                        <Button variant="outlined" color="primary" onClick={() => setSelectedType(null)} sx={{ mr: 3, mt: 3 }}>Cancel</Button>
-
+                        <form>
+                            <InputLabel id="label-currency">Currency</InputLabel>
+                            <Select
+                                labelId="label-currency"
+                                
+                                label="Currency"
+                                fullWidth
+                                value={form.currency}
+                                onChange={({ target: { value } }) => setForm({ ...form, currency: value })}>
+                                <MenuItem value=''><em>Select currency</em></MenuItem>
+                                {portf.allowedCurrencies.map(cur => (<MenuItem value={cur}>{cur}</MenuItem>))}
+                            </Select>
+                            <TextField
+                                margin="normal"
+                                required
+                                fullWidth
+                                label="Amount"
+                                value={form.amount}
+                                onChange={({ target: { value } }) => setForm({ ...form, amount: value })}
+                            />
+                            <Button type='submit' variant="contained" color="primary" onClick={submitDeposit} sx={{ mr: 3, mt: 3 }}>Submit</Button>
+                            <Button variant="outlined" color="primary" onClick={() => setSelectedType(null)} sx={{ mr: 3, mt: 3 }}>Cancel</Button>
+                        </form>
                     </ContentBox>
                 </Grid>
-                
+
 
             </Grid>
 
@@ -113,28 +114,29 @@ const PerformFunding = () => {
                 </Grid>
                 <Grid sm={12} md={8}>
                     <ContentBox title="Withdraw from Balances">
-                        <InputLabel id="label-currency">Currency</InputLabel>
-                        <Select
-                            labelId="label-currency"
-                            margin="normal"
-                            label="Currency"
-                            fullWidth
-                            value={form.currency} onChange={({ target: { value } }) => setForm({ ...form, currency: value })}>
-                            <MenuItem value=''><em>Select currency</em></MenuItem>
-                            {/* only allow withdrawal from balance currencies */}
-                            {Object.keys(portf.balances).map(cur => (<MenuItem value={cur}>{cur}</MenuItem>))}
-                        </Select>
-                        <TextField
-                            margin="normal"
-                            required
-                            fullWidth
-                            label="Amount"
-                            value={form.amount}
-                            onChange={({ target: { value } }) => setForm({ ...form, amount: value })}
-                        />
-                        <Button variant="contained" color="primary" onClick={submitWithdrawal} sx={{ mr: 3, mt: 3 }}>Submit</Button>
-                        <Button variant="outlined" color="primary" onClick={() => setSelectedType(null)} sx={{ mr: 3, mt: 3 }}>Cancel</Button>
-
+                        <form>
+                            <InputLabel id="label-currency">Currency</InputLabel>
+                            <Select
+                                labelId="label-currency"
+                               
+                                label="Currency"
+                                fullWidth
+                                value={form.currency} onChange={({ target: { value } }) => setForm({ ...form, currency: value })}>
+                                <MenuItem value=''><em>Select currency</em></MenuItem>
+                                {/* only allow withdrawal from balance currencies */}
+                                {Object.keys(portf.balances).map(cur => (<MenuItem value={cur}>{cur}</MenuItem>))}
+                            </Select>
+                            <TextField
+                                margin="normal"
+                                required
+                                fullWidth
+                                label="Amount"
+                                value={form.amount}
+                                onChange={({ target: { value } }) => setForm({ ...form, amount: value })}
+                            />
+                            <Button type='submit' variant="contained" color="primary" onClick={submitWithdrawal} sx={{ mr: 3, mt: 3 }}>Submit</Button>
+                            <Button variant="outlined" color="primary" onClick={() => setSelectedType(null)} sx={{ mr: 3, mt: 3 }}>Cancel</Button>
+                        </form>
                     </ContentBox>
                 </Grid>
             </Grid>
