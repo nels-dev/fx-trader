@@ -1,5 +1,7 @@
 on:
   push:
+    paths:
+      - backend/**
     branches:
       - main
 permissions:
@@ -8,35 +10,6 @@ permissions:
   id-token: write
   
 jobs:
-  deploy-fe:
-    name: Build frontend
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
-      - name: Install dependencies
-        run: npm install
-        working-directory: ./frontend
-      - name: Build Project
-        working-directory: ./frontend
-        run: npm run build
-      - name: Setup pages        
-        uses: actions/configure-pages@v3
-      - name: Upload
-        uses: actions/upload-pages-artifact@v1        
-        with:
-          path: './frontend/dist'
-      - name: Deploy to github pages
-        id: deployment
-        uses: actions/deploy-pages@v1
-
   deploy-be:
     name: Build backend
     runs-on: ubuntu-latest

@@ -42,4 +42,4 @@ const routes = [
         ]
     }
 ]
-export default createBrowserRouter(routes);
+export default createBrowserRouter(routes, { basename: import.meta.env.VITE_ROUTER_BASENAME});
