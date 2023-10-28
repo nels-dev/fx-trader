@@ -13,7 +13,7 @@ const Login = () => {
     const {doAlert} = useAlert();
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-    const submit = () => {
+    const submit = (event) => {
         setLoading(true)
         login(form)
         .then(resp=> {
@@ -31,6 +31,7 @@ const Login = () => {
             type: 'error',
             title: 'Login Failed'}))
         .finally(()=>{setLoading(false)})
+        event?.preventDefault()
     }
     useEffect(()=>{
         if(token){
@@ -50,7 +51,7 @@ const Login = () => {
                     <Typography variant="h5">
                         Welcome back, Investor!
                     </Typography>
-                    <form>
+                    <form onSubmit={submit}>
                         <TextField
                             margin="normal"
                             required

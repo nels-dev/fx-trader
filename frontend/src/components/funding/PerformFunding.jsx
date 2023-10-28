@@ -15,21 +15,23 @@ const PerformFunding = () => {
     const [form, setForm] = useState({ currency: '', amount: 0 })
     const [portf, setPortf] = useState()
     const { doAlert } = useAlert();
-    const submitDeposit = () => {
+    const submitDeposit = (event) => {
         deposit(form)
             .then(() => {
                 doAlert({ message: 'You have successfully funded your account', type: 'success', title: 'Deposit Success' })
                 navigate("/")
             })
             .catch((error) => doAlert({ message: `Cannot fund your account. ${error.response?.data?.message || ''}`, type: 'error', title: 'Deposit Failed!' }))
+        event?.preventDefault()
     }
-    const submitWithdrawal = () => {
+    const submitWithdrawal = (event) => {
         withdraw(form)
             .then(() => {
                 doAlert({ message: 'You have successfully withdrawn from your account', type: 'success', title: 'Withdrawal Success' })
                 navigate("/")
             })
             .catch((error) => doAlert({ message: `Cannot withdraw from your account. ${error.response?.data?.message || ''}`, type: 'error', title: 'Withdrawal Failed!' }))
+        event?.preventDefault()
     }
     useEffect(() => {
         getPortfolio()
@@ -76,7 +78,7 @@ const PerformFunding = () => {
                 </Grid>
                 <Grid sm={12} md={8}>
                     <ContentBox title='Add Fund'>
-                        <form>
+                        <form onSubmit={submitDeposit}>
                             <InputLabel id="label-currency">Currency</InputLabel>
                             <Select
                                 labelId="label-currency"
@@ -114,7 +116,7 @@ const PerformFunding = () => {
                 </Grid>
                 <Grid sm={12} md={8}>
                     <ContentBox title="Withdraw from Balances">
-                        <form>
+                        <form onSubmit={submitWithdrawal}>
                             <InputLabel id="label-currency">Currency</InputLabel>
                             <Select
                                 labelId="label-currency"
