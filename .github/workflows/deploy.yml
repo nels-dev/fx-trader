@@ -4,9 +4,39 @@ on:
       - main
 
 jobs:
-  deploy:
+  deploy-fe:
+    name: Build frontend
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./frontend
+      - name: Build Project
+        working-directory: ./frontend
+        run: npm run build
+      - name: Setup pages        
+        uses: action/configure-pages@v3
+      - name: Upload
+        uses: action/upload-pages/artifact@v1
+        working-directory: ./frontend
+        with:
+          path: './dist'
+      - name: Deploy to github pages
+        id: deployment
+        uses: actions/deploy-pages@v1
 
+  deploy-be:
+    name: Build backend
+    runs-on: ubuntu-latest
+    
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-java@v3

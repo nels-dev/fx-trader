@@ -17,6 +17,7 @@ import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -139,10 +140,12 @@ public class PortfolioService {
                         userPortfolio.getBaseCurrency(),
                         balance.getAmount()))
             .reduce(BigDecimal.ZERO, BigDecimal::add);
+    BigDecimal totalDepositWithdrawal = userPortfolio.getAmountDeposited().add(userPortfolio.getAmountWithdrawn());
     BigDecimal percentageChange =
         balanceInBase
-            .subtract(userPortfolio.getAmountDeposited())
-            .divide(userPortfolio.getAmountDeposited(), 4, RoundingMode.HALF_UP);
+            .add(userPortfolio.getAmountWithdrawn())
+            .subtract(totalDepositWithdrawal)
+            .divide(totalDepositWithdrawal, 4, RoundingMode.HALF_UP);
     var balancesMap =
         userPortfolio.getBalances().stream()
             .collect(Collectors.toMap(Balance::getCurrency, Balance::getAmount));
@@ -154,6 +157,7 @@ public class PortfolioService {
         .balanceInBaseCurrency(balanceInBase)
         .percentageChange(percentageChange)
         .balances(balancesMap)
-        .build();
+        .allowedCurrencies(Set.of(Currency.values()))
+                            .build();
   }
 }

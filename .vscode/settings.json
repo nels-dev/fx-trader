@@ -2,5 +2,6 @@
     "[python]": {
         "editor.defaultFormatter": "ms-python.autopep8"
     },
-    "python.formatting.provider": "none"
+    "files.autoSave": "afterDelay",
+    "java.compile.nullAnalysis.mode": "disabled",
 }

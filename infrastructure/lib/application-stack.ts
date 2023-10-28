@@ -22,7 +22,7 @@ export class ApplicationStack extends cdk.Stack {
       minCapacity:0,
       allowAllOutbound: true,
       updatePolicy: UpdatePolicy.rollingUpdate({
-        minInstancesInService: 0,
+        minInstancesInService: 1,
         maxBatchSize: 1,
         minSuccessPercentage: 0,
       })
@@ -53,8 +53,11 @@ export class ApplicationStack extends cdk.Stack {
     // A placeholder container
     taskDefinition.addContainer('Application', {
       containerName: 'Application',
-      image: ecs.ContainerImage.fromRegistry('public.ecr.aws/h7u1f7w9/fx-assist-backend-repository:6ba277f869940913bc41acf27df24884af6f0792'),
-      memoryLimitMiB: 512,
+      // Limitation: defining a public ECR repository from CDK is not supported. The repository is created manually
+      // Moreover, a task definition must contain a valid image, so the first image with "latest" tag is uploaded manually
+      image: ecs.ContainerImage.fromRegistry('public.ecr.aws/h7u1f7w9/fx-assist-backend-repository:latest'),
+      cpu: 512,
+      memoryLimitMiB: 500,
       portMappings: [
         {
           hostPort: 80,
@@ -64,14 +67,14 @@ export class ApplicationStack extends cdk.Stack {
       environment:{
         "MONGODB_PASSWORD": process.env.MONGO_PASSWORD || ''
       },
-      logging: LogDriver.awsLogs({streamPrefix: 'backend', logGroup: new LogGroup(this, 'BackendLogGroup', {logGroupName: '/application/FxAssistBackend', retention: RetentionDays.FIVE_DAYS, removalPolicy: RemovalPolicy.DESTROY})})
+      logging: LogDriver.awsLogs({streamPrefix: 'backend', logGroup: new LogGroup(this, 'ApplicationLogGroup', {logGroupName: '/app/FxAssistBackend', retention: RetentionDays.FIVE_DAYS, removalPolicy: RemovalPolicy.DESTROY})})
     })
     const service = new ecs.Ec2Service(this, 'Service', {
       serviceName: 'FxAssistBackendService',
       cluster,
       taskDefinition,
       minHealthyPercent: 0,
-      maxHealthyPercent: 100,
+      maxHealthyPercent: 200,
     })
 
     targetGroup.addTarget(service)

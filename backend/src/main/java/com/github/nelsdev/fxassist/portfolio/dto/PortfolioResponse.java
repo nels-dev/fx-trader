@@ -4,6 +4,7 @@ import com.github.nelsdev.fxassist.common.types.Currency;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Map;
+import java.util.Set;
 import lombok.Builder;
 import lombok.Value;
 
@@ -20,4 +21,5 @@ public class PortfolioResponse {
   BigDecimal amountDeposited;
   BigDecimal amountWithdrawn;
   BigDecimal percentageChange;
+  Set<Currency> allowedCurrencies;
 }
