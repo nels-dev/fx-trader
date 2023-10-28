@@ -25,8 +25,7 @@ jobs:
       - name: Setup pages        
         uses: action/configure-pages@v3
       - name: Upload
-        uses: action/upload-pages/artifact@v1
-        working-directory: ./frontend
+        uses: action/upload-pages/artifact@v1        
         with:
           path: './dist'
       - name: Deploy to github pages
