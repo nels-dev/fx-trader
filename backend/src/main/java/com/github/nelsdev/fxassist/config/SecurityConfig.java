@@ -51,7 +51,7 @@ public class SecurityConfig {
   CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.setAllowedOriginPatterns(
-        Arrays.asList("http://localhost:[*]", "https://*.nels-dev.github.io"));
+        Arrays.asList("http://localhost:[*]", "https://nels-dev.github.io"));
     configuration.setAllowedMethods(List.of("*"));
     configuration.setAllowedHeaders(List.of("*"));
     UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource =
