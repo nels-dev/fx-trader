@@ -7,12 +7,30 @@ import {LogDriver} from 'aws-cdk-lib/aws-ecs'
 import * as elb from 'aws-cdk-lib/aws-elasticloadbalancingv2'
 import {UpdatePolicy} from "aws-cdk-lib/aws-autoscaling";
 import {LogGroup, RetentionDays} from "aws-cdk-lib/aws-logs";
-
+import * as cloudfront from 'aws-cdk-lib/aws-cloudfront'
+import * as origins from 'aws-cdk-lib/aws-cloudfront-origins'
 export class ApplicationStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props)
 
-    const cluster = new ecs.Cluster(this, 'FxAssistBackendCluster', {clusterName: 'FxAssistBackendCluster'});
+    // IMPORTANT: make sure CDK does not create an expensive NAT gateway by default
+    const vpc = new ec2.Vpc(this, 'BackendClusterVpc', {
+      natGateways: 0,
+      enableDnsHostnames: true,
+      enableDnsSupport: true, 
+      maxAzs:2,
+      subnetConfiguration:[
+        {
+          cidrMask: 24,
+          name: 'ingress',
+          subnetType: ec2.SubnetType.PUBLIC,
+        },
+      ]
+    })
+    const cluster = new ecs.Cluster(this, 'FxAssistBackendCluster', {
+      clusterName: 'FxAssistBackendCluster',
+      vpc: vpc
+    });
 
     // Add EC2 instances as capacity to the cluster. Managed by an auto scaling group which only allow at most 1 active instance.
     cluster.addCapacity('DefaultAutoScalingGroup', {
@@ -39,6 +57,17 @@ export class ApplicationStack extends cdk.Stack {
       vpc: cluster.vpc,
       internetFacing: true,
       securityGroup: securityGroup,
+    })
+
+    new cloudfront.Distribution(this, 'cfDistribution', {
+      defaultBehavior:{
+        origin: new origins.LoadBalancerV2Origin(alb, {
+          protocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY
+        }),
+        allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
+        cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
+        originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER
+      }
     })
 
     const targetGroup = alb.addListener('listener', {port: 80, open: true}).addTargets('ecsTarget', {

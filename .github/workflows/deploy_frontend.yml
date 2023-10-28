@@ -30,7 +30,7 @@ jobs:
         working-directory: ./frontend
         run: npm run build
         env:
-          VITE_BACKEND_URL: http://Applic-loadB-KYH0g9BIxcsT-1369841510.us-west-2.elb.amazonaws.com
+          VITE_BACKEND_URL: https://d1240e7io4ghxq.cloudfront.net
           VITE_ROUTER_BASENAME: /fx-trader/
       - name: Setup pages        
         uses: actions/configure-pages@v3
