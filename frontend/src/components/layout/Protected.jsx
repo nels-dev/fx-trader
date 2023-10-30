@@ -10,7 +10,7 @@ const Protected = () => {
         }
     }, [token])
     
-    return (
+    return token && (
         <Outlet/>
     );
 }

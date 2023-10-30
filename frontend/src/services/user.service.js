@@ -1,5 +1,4 @@
 import api from "../config/api"
 
-const login = (form)=>api.post("/login", {...form})
-
-export {login}
+export const login = (form)=>api.post("/login", {...form})
+export const register = (form)=>api.post("/user", {...form})

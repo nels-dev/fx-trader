@@ -3,7 +3,7 @@ import api from "../config/api";
 
 // reference: https://dev.to/sanjayttg/jwt-authentication-in-react-with-react-router-1d03
 
-const AuthContext = createContext()
+const AuthContext = createContext({})
 
 const AuthProvider = ({children}) => {
 
@@ -12,7 +12,6 @@ const AuthProvider = ({children}) => {
     // toggle local storage and axios settings when token changes
     useEffect(()=>{
         if(token){
-            console.log('Setting token and axios default')
             api.defaults.headers.common['Authorization'] = `Bearer ${token}`
             localStorage.setItem('token', token)
         }else{

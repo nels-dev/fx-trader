@@ -1,15 +1,17 @@
-import { useState, useEffect } from "react";
-import { getPortfolio } from "../../services/portfolio.service";
-import { Paper, Typography, Divider } from "@mui/material";
+import ContentBox from "@/components/layout/ContentBox";
+import { Typography } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
+import { useEffect, useState } from "react";
+import { getPortfolio } from "../../services/portfolio.service";
 import { formatAmount } from "../../utils/number.utils";
-import ContentBox from "../layout/ContentBox";
+
 const BalanceTable = ({ balances }) => {
     const [curBalances, setCurBalances] = useState(balances)
     useEffect(() => {        
         if (!balances) {
             getPortfolio()
                 .then(({ data }) => { setCurBalances(data.balances) })
+                .catch(()=> setCurBalances({}))
         }
     }, [balances])
     return (

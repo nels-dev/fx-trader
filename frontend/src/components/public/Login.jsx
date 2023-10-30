@@ -1,11 +1,11 @@
-import { Paper, Button, TextField, Container, Typography, Stack } from "@mui/material";
+import { Button, Container, Paper, Stack, TextField, Typography } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { useEffect, useState } from "react";
-import logo from '../../assets/logo.svg'
-import { login } from "../../services/user.service";
-import { useAuth } from "../../provider/auth.provider";
 import { useNavigate } from "react-router";
-import { useAlert } from "../../provider/alert.provider";
+import logo from '../../assets/logo.svg';
+import { useAlert } from "@/provider/alert.provider";
+import { useAuth } from "@/provider/auth.provider";
+import { login } from "@/services/user.service";
 
 const Login = () => {
     const [form, setForm] = useState({ email: "", password: "" })
@@ -26,7 +26,7 @@ const Login = () => {
                     title: 'Login Failed'})
             }
         })
-        .catch(err=> doAlert({
+        .catch(()=> doAlert({
             message:'Unable to perform the operation. Please try again later',
             type: 'error',
             title: 'Login Failed'}))
@@ -37,7 +37,7 @@ const Login = () => {
         if(token){
             navigate('/')
         }
-    }, [token])
+    }, [token, navigate])
 
     return (<Container maxWidth="md"
         sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', height: '100vh' }}>
@@ -83,7 +83,7 @@ const Login = () => {
                             <Button type="submit" variant="contained" color="primary" onClick={submit} disabled={loading} >
                                 Login
                             </Button>
-                            <Button variant="outlined" color="primary" onClick={submit} disabled={loading}>
+                            <Button variant="outlined" color="primary" onClick={()=>navigate('/register')} disabled={loading}>
                                 Register
                             </Button>
                         </Stack>

@@ -7,28 +7,39 @@ import { formatAmount } from "../../utils/number.utils"
 import BalanceTable from "./BalanceTable";
 import ContentBox from "../layout/ContentBox";
 import Loading from "../layout/Loading"
-import { Stack, Button } from "@mui/material"
+import { Stack, Button, Card, CardActionArea } from "@mui/material"
 import { Link } from "react-router-dom";
+import FolderSpecialIcon from '@mui/icons-material/FolderSpecial';
+import { useNavigate } from "react-router-dom";
 const PortfolioSummary = () => {
-    const [portf, setPortf] = useState()
+    const [portf, setPortf] = useState(null)
     const [loading, setLoading] = useState(true)
+    const [noActivePortfolio, setNoActivePortfolio] = useState(false)
+    const navigate = useNavigate()
     useEffect(() => {
         getPortfolio()
             .then(({ data }) => {
                 setPortf(data);
-                setLoading(false)
+
             })
+            .catch(err => {
+                console.log(err.response)
+                if (err.response?.status == 404) {
+                    setNoActivePortfolio(true)
+                }
+            })
+            .finally(() => setLoading(false))
     }, [])
     return (<>
         {loading && (<Loading />)}
-        {!loading && (
+        {!loading && portf && (
             (<section>
 
                 <Grid container mt={3} spacing={3}>
                     <Grid sm={12} md={6}>
                         <ContentBox title="My Portfolio">
-                            <Typography variant="h4" sx={{ mt: 2, mb: 2 }}>{portf.baseCurrency}
-                                {formatAmount(portf.balanceInBaseCurrency)}
+                            <Typography variant="h4" sx={{ mt: 2, mb: 2 }}>
+                                {`${portf.baseCurrency}  ${formatAmount(portf.balanceInBaseCurrency)}`}
                             </Typography>
                             <Typography variant="subtitle2">Portfolio total value </Typography>
                             <Typography variant="h4" sx={{ mt: 2, mb: 2 }}>{portf.percentageChange >= 0 ? "+" : ""}{Number(portf.percentageChange * 100).toFixed(2)}%</Typography>
@@ -44,6 +55,26 @@ const PortfolioSummary = () => {
                     </Grid>
                 </Grid>
             </section>)
+        )}
+        {noActivePortfolio && (
+            <section>
+                <Grid container spacing={3}>
+                    <Grid xs/>
+                    <Grid sm={8} md={6}>
+                        <Card sx={{ backgroundColor: 'primary.light', height: "100%", mt: 3 }} onClick={() => navigate('funding')}>
+                            <CardActionArea sx={{ p: 3, textAlign: 'center', height: "100%" }}>
+                                <FolderSpecialIcon sx={{ fontSize: 60, color: "primary.contrastText" }} />
+
+                                <Typography gutterBottom variant="h4" color="primary.contrastText">Create Your Portfolio</Typography>
+                                <Typography variant="caption" color="primary.contrastText">
+                                Currently, you don&apos;t have an active portfolio. Begin monitoring your investments by funding your account with one of our supported currencies. The initial funding currency will be set as your portfolio&apos;s base currency and cannot be changed.
+                                </Typography>
+                            </CardActionArea>
+                        </Card>
+                    </Grid>
+                    <Grid xs/>
+                </Grid>
+            </section>
         )}
     </>)
 }

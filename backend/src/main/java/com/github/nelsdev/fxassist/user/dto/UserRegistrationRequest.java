@@ -9,7 +9,6 @@ public class UserRegistrationRequest {
 
   String firstName;
   String lastName;
-  String userName;
   String email;
   String password;
 }

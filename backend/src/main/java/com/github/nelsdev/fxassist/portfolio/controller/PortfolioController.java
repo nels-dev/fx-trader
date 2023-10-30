@@ -1,6 +1,7 @@
 package com.github.nelsdev.fxassist.portfolio.controller;
 
 import com.github.nelsdev.fxassist.common.exception.ApplicationError;
+import com.github.nelsdev.fxassist.common.types.Currency;
 import com.github.nelsdev.fxassist.portfolio.dto.CreatePortfolioRequest;
 import com.github.nelsdev.fxassist.portfolio.dto.PortfolioResponse;
 import com.github.nelsdev.fxassist.portfolio.exception.ActivePortfolioExistException;
@@ -31,6 +32,11 @@ public class PortfolioController {
   @GetMapping
   public PortfolioResponse getPortfolio() {
     return service.getPortfolio();
+  }
+
+  @GetMapping("/allowed-currencies")
+  public Currency[] getAllowableCurrencies(){
+    return Currency.values();
   }
 
   @ExceptionHandler(ActivePortfolioExistException.class)

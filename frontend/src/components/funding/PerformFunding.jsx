@@ -1,27 +1,38 @@
-import { useState, useEffect } from "react";
-import Grid from "@mui/material/Unstable_Grid2";
-import { Typography, Card, Button, Select, MenuItem, TextField, Paper, Divider, InputLabel, CardActionArea } from "@mui/material";
-import BalanceTable from "../portfolio/BalanceTable";
-import ContentBox from "../layout/ContentBox";
-import { getPortfolio } from "../../services/portfolio.service";
-import { deposit, withdraw } from "../../services/transaction.service"
-import { useAlert } from "../../provider/alert.provider";
-import { useNavigate } from "react-router-dom";
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import LogoutIcon from '@mui/icons-material/LogoutOutlined';
+import { Alert, Button, Card, CardActionArea, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
+import Grid from "@mui/material/Unstable_Grid2";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAlert } from "../../provider/alert.provider";
+import { createPortfolio, getAllowedCurrencies, getPortfolio } from "../../services/portfolio.service";
+import { deposit, withdraw } from "../../services/transaction.service";
+import ContentBox from "../layout/ContentBox";
+import BalanceTable from "../portfolio/BalanceTable";
 const PerformFunding = () => {
     const navigate = useNavigate();
-    const [selectedType, setSelectedType] = useState()
+    const [selectedType, setSelectedType] = useState('')
     const [form, setForm] = useState({ currency: '', amount: 0 })
-    const [portf, setPortf] = useState()
+    const [portf, setPortf] = useState({ balances: {} }) 
+    const [preCreate, setPreCreate] = useState(false)
+    const [allowedCurrencies, setAllowedCurrencies] = useState([])
     const { doAlert } = useAlert();
     const submitDeposit = (event) => {
+        if(preCreate){
+            createPortfolio(form)
+            .then(() => {
+                doAlert({ message: 'You have successfully funded your account', type: 'success', title: 'Portfolio Created!' })
+                navigate("/")
+            })
+            .catch((error) => doAlert({ message: `Cannot fund your account. ${error.response?.data?.message || ''}`, type: 'error', title: 'Deposit Failed!' }))
+        }else{
         deposit(form)
             .then(() => {
                 doAlert({ message: 'You have successfully funded your account', type: 'success', title: 'Deposit Success' })
                 navigate("/")
             })
             .catch((error) => doAlert({ message: `Cannot fund your account. ${error.response?.data?.message || ''}`, type: 'error', title: 'Deposit Failed!' }))
+        }
         event?.preventDefault()
     }
     const submitWithdrawal = (event) => {
@@ -38,9 +49,18 @@ const PerformFunding = () => {
             .then(({ data }) => {
                 setPortf(data);
             })
+            .catch(error => {
+                if (error.response.status == 404) {
+                    setPreCreate(true)
+                }
+            })
+        getAllowedCurrencies()
+            .then(({ data }) => {
+                setAllowedCurrencies(data);
+            })
     }, [])
 
-    if (!selectedType) {
+    if (!selectedType && !preCreate) {
         return (
             <Grid container spacing={3}>
                 <Grid sm={12} md={7}>
@@ -50,7 +70,7 @@ const PerformFunding = () => {
 
                             <Typography gutterBottom variant="h4" color="primary.contrastText">Fund your portfolio</Typography>
                             <Typography variant="caption" color="primary.contrastText">
-                                Top up your account to begin trading. Choose from our range of supported currencies. While no real money is involved, this mirrors the fund movement in your actual portfolio. It's also a great way to initiate your virtual portfolio for strategy assessments.
+                                Top up your account to begin trading. Choose from our range of supported currencies. While no real money is involved, this mirrors the fund movement in your actual portfolio. It&apos;s also a great way to initiate your virtual portfolio for strategy assessments.
                             </Typography>
                         </CardActionArea>
                     </Card>
@@ -70,11 +90,21 @@ const PerformFunding = () => {
 
             </Grid>
         )
-    } else if (selectedType === 'DEPOSIT') {
+    } else if (selectedType === 'DEPOSIT' || preCreate) {
         return (
             <Grid container spacing={3}>
                 <Grid sm={12} md={4}>
-                    <BalanceTable balances={portf.balances} />
+                    {preCreate && (<>
+                        <ContentBox title='Intital funding'>
+                            <p>
+                                <Typography variant='body1'>
+                                    Fund your account to activate your portfolio. The initial funding currency will be set as your portfolio&apos;s base currency and cannot be changed.
+                                </Typography>
+                            </p>
+                        </ContentBox>
+                    </>)}
+                    {!preCreate && (<BalanceTable balances={portf.balances} />)}
+
                 </Grid>
                 <Grid sm={12} md={8}>
                     <ContentBox title='Add Fund'>
@@ -82,13 +112,13 @@ const PerformFunding = () => {
                             <InputLabel id="label-currency">Currency</InputLabel>
                             <Select
                                 labelId="label-currency"
-                                
+
                                 label="Currency"
                                 fullWidth
                                 value={form.currency}
                                 onChange={({ target: { value } }) => setForm({ ...form, currency: value })}>
                                 <MenuItem value=''><em>Select currency</em></MenuItem>
-                                {portf.allowedCurrencies.map(cur => (<MenuItem value={cur}>{cur}</MenuItem>))}
+                                {allowedCurrencies.map(cur => (<MenuItem key={cur} value={cur}>{cur}</MenuItem>))}
                             </Select>
                             <TextField
                                 margin="normal"
@@ -96,10 +126,12 @@ const PerformFunding = () => {
                                 fullWidth
                                 label="Amount"
                                 value={form.amount}
-                                onChange={({ target: { value } }) => setForm({ ...form, amount: value })}
+                                onChange={({ target: { value } }) => setForm({ ...form, amount: Number(value) })}
                             />
                             <Button type='submit' variant="contained" color="primary" onClick={submitDeposit} sx={{ mr: 3, mt: 3 }}>Submit</Button>
-                            <Button variant="outlined" color="primary" onClick={() => setSelectedType(null)} sx={{ mr: 3, mt: 3 }}>Cancel</Button>
+                            {!preCreate && (
+                                <Button variant="outlined" color="primary" onClick={() => setSelectedType(null)} sx={{ mr: 3, mt: 3 }}>Cancel</Button>
+                            )}
                         </form>
                     </ContentBox>
                 </Grid>
@@ -120,13 +152,13 @@ const PerformFunding = () => {
                             <InputLabel id="label-currency">Currency</InputLabel>
                             <Select
                                 labelId="label-currency"
-                               
+
                                 label="Currency"
                                 fullWidth
                                 value={form.currency} onChange={({ target: { value } }) => setForm({ ...form, currency: value })}>
                                 <MenuItem value=''><em>Select currency</em></MenuItem>
                                 {/* only allow withdrawal from balance currencies */}
-                                {Object.keys(portf.balances).map(cur => (<MenuItem value={cur}>{cur}</MenuItem>))}
+                                {Object.keys(portf.balances).map(cur => (<MenuItem key={cur} value={cur}>{cur}</MenuItem>))}
                             </Select>
                             <TextField
                                 margin="normal"
@@ -134,7 +166,7 @@ const PerformFunding = () => {
                                 fullWidth
                                 label="Amount"
                                 value={form.amount}
-                                onChange={({ target: { value } }) => setForm({ ...form, amount: value })}
+                                onChange={({ target: { value } }) => setForm({ ...form, amount: Number(value) })}
                             />
                             <Button type='submit' variant="contained" color="primary" onClick={submitWithdrawal} sx={{ mr: 3, mt: 3 }}>Submit</Button>
                             <Button variant="outlined" color="primary" onClick={() => setSelectedType(null)} sx={{ mr: 3, mt: 3 }}>Cancel</Button>

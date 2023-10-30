@@ -2,6 +2,12 @@
     "[python]": {
         "editor.defaultFormatter": "ms-python.autopep8"
     },
+    "[javascript]" : {
+        "editor.codeActionsOnSave": {
+            "source.fixAll.eslint": true
+        },
+    },    
+    "eslint.validate": ["javascript"],
     "files.autoSave": "afterDelay",
     "java.compile.nullAnalysis.mode": "disabled",
 }

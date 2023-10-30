@@ -1,6 +1,6 @@
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
 import { useEffect, useState } from "react";
 import { getTransactions } from "../../services/transaction.service";
-import { Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
 import { formatAmount } from "../../utils/number.utils";
 import ContentBox from "../layout/ContentBox";
 import Loading from "../layout/Loading";

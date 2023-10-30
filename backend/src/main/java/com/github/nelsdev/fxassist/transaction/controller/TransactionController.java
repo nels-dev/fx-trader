@@ -1,7 +1,6 @@
 package com.github.nelsdev.fxassist.transaction.controller;
 
 import com.github.nelsdev.fxassist.common.exception.ApplicationError;
-import com.github.nelsdev.fxassist.portfolio.exception.ActivePortfolioExistException;
 import com.github.nelsdev.fxassist.transaction.dto.DepositRequest;
 import com.github.nelsdev.fxassist.transaction.dto.TradeRequest;
 import com.github.nelsdev.fxassist.transaction.dto.TransactionsResponse;

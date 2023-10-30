@@ -66,14 +66,13 @@ public class UserService implements UserDetailsService {
   }
 
   public void register(UserRegistrationRequest request) throws UserAlreadyExistException {
-    if (userRepository.existsByUsernameAndEmail(request.getUserName(), request.getEmail())) {
+    if (userRepository.existsByEmail(request.getEmail())) {
       throw new UserAlreadyExistException();
     }
 
     User user = new User();
     user.setFirstName(request.getFirstName());
     user.setLastName(request.getLastName());
-    user.setUsername(request.getUserName());
     user.setEmail(request.getEmail());
     user.setPassword(passwordEncoder.encode(request.getPassword()));
     userRepository.save(user);

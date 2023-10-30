@@ -7,6 +7,7 @@ import PortfolioSummary from "../components/portfolio/PortfolioSummary";
 import Funding from "../components/funding/Funding";
 import Trade from "../components/trade/Trade";
 import Notifications from "../components/notifications/Notifications";
+import Register from "../components/public/Register";
 const routes = [
     {
         path:"/",
@@ -15,6 +16,10 @@ const routes = [
             {
                 path: "login",
                 element: <Login/>,
+            },
+            {
+                path: "register",
+                element: <Register/>,
             },
             {
                 path: "/",
@@ -42,4 +47,4 @@ const routes = [
         ]
     }
 ]
-export default createBrowserRouter(routes, { basename: import.meta.env.VITE_ROUTER_BASENAME});
+export default createBrowserRouter(routes, { basename: import.meta.env.BASE_URL});
