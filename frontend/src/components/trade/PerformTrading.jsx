@@ -73,7 +73,7 @@ const PerformTrading = () => {
    }
   return (
     <Grid container spacing={3}>
-      <Grid sm={12} md={4}>
+      <Grid xs={12} md={4}>
         {preCreate && (<>
           <ContentBox title='Intital funding'>
             <p>
@@ -88,7 +88,7 @@ const PerformTrading = () => {
         {!preCreate && (<BalanceTable balances={portf.balances} />)}
 
       </Grid>
-      <Grid sm={12} md={8}>
+      <Grid xs={12} md={8}>
         <ContentBox title='Trade'>
           <Grid container gap={2} sx={{ mt: 2, mb: 2 }}>
             <Grid sm>

@@ -66,7 +66,7 @@ const Login = () => {
       alignItems: 'center',
       width: '100%'
     }} elevation={8}>
-      <Grid container sm={12}>
+      <Grid container xs={12}>
         <Grid md={6} sx={{p: 10}}>
           <img style={{objectFit: 'contain', width: "100%", height: '100%'}}
                src={logo}/>

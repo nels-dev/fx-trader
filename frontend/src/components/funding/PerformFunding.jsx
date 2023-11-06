@@ -98,7 +98,7 @@ const PerformFunding = () => {
   if (!selectedType && !preCreate) {
     return (
         <Grid container spacing={3}>
-          <Grid sm={12} md={7}>
+          <Grid xs={12} md={7}>
             <Card sx={{backgroundColor: 'primary.light', height: "100%"}}
                   onClick={() => setSelectedType('DEPOSIT')}>
               <CardActionArea sx={{p: 3, textAlign: 'center', height: "100%"}}>
@@ -118,15 +118,15 @@ const PerformFunding = () => {
               </CardActionArea>
             </Card>
           </Grid>
-          <Grid sm={12} md={5}>
+          <Grid xs={12} md={5}>
             <Card variant="outlined" sx={{textAlign: 'center', height: "100%"}}
                   onClick={() => setSelectedType('WITHDRAWAL')}>
               <CardActionArea sx={{p: 3, textAlign: 'center'}}>
-                <LogoutIcon sx={{fontSize: 60, color: "secondary"}}/>
+                <LogoutIcon sx={{fontSize: 60, color: "primary.main"}}/>
 
-                <Typography gutterBottom variant="h4" color="secondary">Withdraw
+                <Typography gutterBottom variant="h4" color="primary">Withdraw
                   from Balances</Typography>
-                <Typography variant="caption" color="secondary">
+                <Typography variant="caption">
                   You may indicate fund withdrawal from any of your existing
                   balances. Withdrawal reduces the size of your total investment
                   and will not affect the calculated return on your portfolio.
@@ -140,7 +140,7 @@ const PerformFunding = () => {
   } else if (selectedType === 'DEPOSIT' || preCreate) {
     return (
         <Grid container spacing={3}>
-          <Grid sm={12} md={4}>
+          <Grid xs={12} md={4}>
             {preCreate && (<>
               <ContentBox title='Intital funding'>
                 <p>
@@ -155,7 +155,7 @@ const PerformFunding = () => {
             {!preCreate && (<BalanceTable balances={portf.balances}/>)}
 
           </Grid>
-          <Grid sm={12} md={8}>
+          <Grid xs={12} md={8}>
             <ContentBox title='Add Fund'>
               <form onSubmit={submitDeposit}>
                 <InputLabel id="label-currency">Currency</InputLabel>
@@ -199,10 +199,10 @@ const PerformFunding = () => {
   } else if (selectedType === 'WITHDRAWAL') {
     return (
         <Grid container spacing={3}>
-          <Grid sm={12} md={4}>
+          <Grid xs={12} md={4}>
             <BalanceTable balances={portf.balances}/>
           </Grid>
-          <Grid sm={12} md={8}>
+          <Grid xs={12} md={8}>
             <ContentBox title="Withdraw from Balances">
               <form onSubmit={submitWithdrawal}>
                 <InputLabel id="label-currency">Currency</InputLabel>

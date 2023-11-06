@@ -1,7 +1,7 @@
 import {getPortfolio} from "../../services/portfolio.service";
 import {useEffect, useState} from "react";
 import Grid from '@mui/material/Unstable_Grid2'
-import {Button, Card, CardActionArea, Stack, Typography} from "@mui/material";
+import {Button, Card, CardActionArea, Stack, Typography, Box} from "@mui/material";
 
 import {formatAmount} from "../../utils/number.utils"
 import BalanceTable from "./BalanceTable";
@@ -9,6 +9,7 @@ import ContentBox from "../layout/ContentBox";
 import Loading from "../layout/Loading"
 import {Link, useNavigate} from "react-router-dom";
 import FolderSpecialIcon from '@mui/icons-material/FolderSpecial';
+import PortfolioChart from "./PortfolioChart";
 
 const PortfolioSummary = () => {
   const [portf, setPortf] = useState(null)
@@ -33,9 +34,9 @@ const PortfolioSummary = () => {
     {loading && (<Loading/>)}
     {!loading && portf && (
         (<section>
-
-          <Grid container mt={3} spacing={3}>
-            <Grid sm={12} md={6}>
+        <Box sx={{mt:3}}>
+          <Grid container spacing={3}>
+            <Grid xs={12} md={6}>
               <ContentBox title="My Portfolio">
                 <Typography variant="h4" sx={{mt: 2, mb: 2}}>
                   {`${portf.baseCurrency}  ${formatAmount(
@@ -57,17 +58,21 @@ const PortfolioSummary = () => {
                 </Stack>
               </ContentBox>
             </Grid>
-            <Grid sm={12} md={6}>
+            <Grid xs={12} md={6}>
               <BalanceTable balances={portf.balances}/>
             </Grid>
+            <Grid xs={12}>
+              <PortfolioChart/>
+            </Grid>
           </Grid>
+          </Box>
         </section>)
     )}
     {noActivePortfolio && (
         <section>
           <Grid container spacing={3}>
             <Grid xs/>
-            <Grid sm={8} md={6}>
+            <Grid xs={8} md={6}>
               <Card
                   sx={{backgroundColor: 'primary.light', height: "100%", mt: 3}}
                   onClick={() => navigate('funding')}>

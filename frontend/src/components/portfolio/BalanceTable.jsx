@@ -1,5 +1,5 @@
 import ContentBox from "@/components/layout/ContentBox";
-import {Typography} from "@mui/material";
+import {Table, TableBody, TableCell, TableRow, Typography} from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import {useEffect, useState} from "react";
 import {getPortfolio} from "../../services/portfolio.service";
@@ -21,18 +21,21 @@ const BalanceTable = ({balances}) => {
   return (
       <ContentBox title="Balances">
         {curBalances && (
-            <Grid container spacing={2}>
-
-              {Object.keys(curBalances).map((key) => (<>
-                    <Grid xs={4}>
-                      <Typography variant="body1">{key}</Typography>
-                    </Grid>
-                    <Grid xs={8} textAlign='right'>
-                      <Typography variant="body1" fontWeight={600}>{formatAmount(
-                          curBalances[key])}</Typography>
-                    </Grid></>
+            <Table>
+              <TableBody>
+              {Object.keys(curBalances).map((key) => (
+                    <TableRow key={key}>
+                      <TableCell>
+                        <Typography variant="body1">{key}</Typography>
+                      </TableCell>
+                      <TableCell align="right">
+                        <Typography variant="body1" fontWeight={600}>{formatAmount(
+                            curBalances[key])}</Typography>
+                      </TableCell>                      
+                    </TableRow>
               ))}
-            </Grid>
+              </TableBody>
+            </Table>            
         )}
       </ContentBox>
   );

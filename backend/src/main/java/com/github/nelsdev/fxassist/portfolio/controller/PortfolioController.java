@@ -4,8 +4,10 @@ import com.github.nelsdev.fxassist.common.exception.ApplicationError;
 import com.github.nelsdev.fxassist.common.types.Currency;
 import com.github.nelsdev.fxassist.portfolio.dto.CreatePortfolioRequest;
 import com.github.nelsdev.fxassist.portfolio.dto.PortfolioResponse;
+import com.github.nelsdev.fxassist.portfolio.entity.UserPortfolioSnapshot;
 import com.github.nelsdev.fxassist.portfolio.exception.ActivePortfolioExistException;
 import com.github.nelsdev.fxassist.portfolio.service.PortfolioService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +34,9 @@ public class PortfolioController {
   public PortfolioResponse getPortfolio() {
     return service.getPortfolio();
   }
+
+  @GetMapping("/snapshots")
+  public List<UserPortfolioSnapshot> getSnapshots() { return service.getSnapshots(); }
 
   @GetMapping("/allowed-currencies")
   public Currency[] getAllowableCurrencies() {
