@@ -8,6 +8,7 @@ const AuthContext = createContext({})
 const AuthProvider = ({children}) => {
 
   const [token, setToken] = useState(localStorage.getItem("token"))
+  const [apiSetupComplete, setApiSetupComplete] = useState(false);
 
   // toggle local storage and axios settings when token changes
   useEffect(() => {
@@ -18,6 +19,7 @@ const AuthProvider = ({children}) => {
       delete api.defaults.headers.common['Authorization'];
       localStorage.removeItem('token')
     }
+    setApiSetupComplete(true)
   }, [token])
 
   // Expose the setAuthToken function to the auth context
@@ -26,7 +28,7 @@ const AuthProvider = ({children}) => {
   const logout = () => setToken(null);
 
   return <AuthContext.Provider
-      value={{token, loginSuccess, logout}}>{children}</AuthContext.Provider>
+      value={{token, loginSuccess, logout, apiSetupComplete}}>{children}</AuthContext.Provider>
 }
 
 // So that the rest of the application can "useAuth()" to get the token & setToken function

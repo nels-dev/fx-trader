@@ -3,15 +3,15 @@ import {useAuth} from "../../provider/auth.provider";
 import {useEffect} from "react";
 
 const Protected = () => {
-  const {token} = useAuth();
+  const { token, apiSetupComplete } = useAuth();
   const navigate = useNavigate();
   useEffect(() => {
-    if (!token) {
+    if (apiSetupComplete && !token) {
       navigate(`/login`)
     }
   }, [token])
 
-  return token && (
+  return apiSetupComplete && (
       <Outlet/>
   );
 }
