@@ -1,38 +1,38 @@
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow
 } from "@mui/material";
 import {useEffect, useState} from "react";
-import {getTransactions} from "../../services/transaction.service";
+import {getTrades} from "../../services/transaction.service";
 import {formatAmount} from "../../utils/number.utils";
 import ContentBox from "../layout/ContentBox";
 import Loading from "../layout/Loading";
 
-const FundingHistory = () => {
+const TradingHistory = () => {
   const [transactions, setTransactions] = useState([])
   const [loading, setLoading] = useState(false)
   useEffect(() => {
     setLoading(true)
-    getTransactions()
+    getTrades()
     .then(({data}) => setTransactions(data.transactions))
     .finally(() => setLoading(false))
   }, [])
   return (<>
         {loading && <Loading/>}
         {!loading && (
-            <TableContainer component={ContentBox} title="Transfer history">
+            <TableContainer component={ContentBox} title="Trade history">
               <Table>
 
                 <TableHead>
                   <TableRow>
                     <TableCell>Date</TableCell>
-                    <TableCell>Type</TableCell>
-                    <TableCell>Currency</TableCell>
-                    <TableCell>Amount</TableCell>
+                    <TableCell>Sold</TableCell>
+                    <TableCell>Bought</TableCell>
+                    <TableCell>Effective Rate</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -41,9 +41,11 @@ const FundingHistory = () => {
                         <TableRow key={row.createdAt}>
                           <TableCell>{new Date(
                               row.createdAt).toLocaleDateString()}</TableCell>
-                          <TableCell>{row.type}</TableCell>
-                          <TableCell>{row.toCurrency}</TableCell>
-                          <TableCell>{formatAmount(row.toAmount)}</TableCell>
+                          <TableCell>{row.fromCurrency} {formatAmount(
+                              row.fromAmount)}</TableCell>
+                          <TableCell>{row.toCurrency} {formatAmount(
+                              row.toAmount)}</TableCell>
+                          <TableCell>{row.rate}</TableCell>
                         </TableRow>
                     ))
                   }
@@ -55,4 +57,4 @@ const FundingHistory = () => {
   );
 }
 
-export default FundingHistory;
+export default TradingHistory;

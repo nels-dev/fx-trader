@@ -1,7 +1,7 @@
 import api from "../config/api"
 
-const deposit = (form)=>api.post("/api/transactions/deposit", {...form})
-const withdraw = (form)=>api.post("/api/transactions/withdrawal", {...form})
-const getTransactions = ()=> api.get("/api/transactions")
-
-export {deposit, withdraw, getTransactions}
+export const deposit = (form) => api.post("/api/transactions/deposit",{...form})
+export const withdraw = (form) => api.post("/api/transactions/withdrawal",{...form})
+export const trade = (form) => api.post("/api/transactions/trade",{...form})
+export const getTransactions = () => api.get("/api/transactions")
+export const getTrades = () => api.get("/api/transactions/trades")

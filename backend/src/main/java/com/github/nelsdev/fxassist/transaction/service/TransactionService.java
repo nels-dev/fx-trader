@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -73,6 +74,7 @@ public class TransactionService {
 
     User user = userService.getCurrentUser();
     Transaction transaction = new Transaction();
+    transaction.setCreatedAt(Instant.now());
     transaction.setUserId(user.getId());
     transaction.setType(TransactionType.TRADE);
     transaction.setToCurrency(tradeRequest.getToCurrency());
@@ -109,26 +111,42 @@ public class TransactionService {
         transaction.getToAmount().divide(transaction.getFromAmount(), 6, RoundingMode.HALF_UP));
 
     portfolioService.recordTradeTransaction(transaction);
+    repository.save(transaction);
   }
 
   public TransactionsResponse getUserTransactions() {
     User user = userService.getCurrentUser();
     var transactions =
-        repository.findAllByUserIdOrderByCreatedAtDesc(user.getId()).stream()
-            .map(
-                t ->
-                    TransactionsResponse.Transaction.builder()
-                        .rate(t.getRate())
-                        .toAmount(t.getToAmount())
-                        .fromAmount(t.getFromAmount())
-                        .fromCurrency(t.getFromCurrency())
-                        .toCurrency(t.getToCurrency())
-                        .createdAt(t.getCreatedAt().atOffset(ZoneOffset.UTC))
-                        .type(t.getType())
-                        .userInputtedRate(t.isUserInputtedRate())
-                        .build())
+        repository.findAllByUserIdAndTypeInOrderByCreatedAtDesc(user.getId(), Set.of(TransactionType.DEPOSIT, TransactionType.WITHDRAWAL)).stream()
+            .map(TransactionService::map)
             .collect(Collectors.toList());
 
     return TransactionsResponse.builder().transactions(transactions).build();
   }
+
+  public TransactionsResponse getTrades() {
+    User user = userService.getCurrentUser();
+    var transactions =
+        repository.findAllByUserIdAndTypeInOrderByCreatedAtDesc(user.getId(), Set.of(TransactionType.TRADE)).stream()
+                  .map(TransactionService::map)
+                  .collect(Collectors.toList());
+
+    return TransactionsResponse.builder().transactions(transactions).build();
+  }
+
+
+  private static TransactionsResponse.Transaction map(Transaction t) {
+    return TransactionsResponse.Transaction.builder()
+                                           .rate(t.getRate())
+                                           .toAmount(t.getToAmount())
+                                           .fromAmount(t.getFromAmount())
+                                           .fromCurrency(t.getFromCurrency())
+                                           .toCurrency(t.getToCurrency())
+                                           .createdAt(t.getCreatedAt()
+                                                       .atOffset(ZoneOffset.UTC))
+                                           .type(t.getType())
+                                           .userInputtedRate(t.isUserInputtedRate())
+                                           .build();
+  }
+
 }

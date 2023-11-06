@@ -30,6 +30,11 @@ public class TransactionController {
     return transactionService.getUserTransactions();
   }
 
+  @GetMapping("/trades")
+  public TransactionsResponse getTrades() {
+    return transactionService.getTrades();
+  }
+
   @PostMapping("/deposit")
   public void deposit(@RequestBody @Valid DepositRequest depositRequest) {
     transactionService.deposit(depositRequest);
@@ -48,6 +53,9 @@ public class TransactionController {
   @ExceptionHandler(InsufficientBalanceException.class)
   public ResponseEntity<ApplicationError> handleInsufficientBalance() {
     return ResponseEntity.status(HttpStatus.CONFLICT.value())
-                         .body(ApplicationError.builder().message("You do not have sufficient balance in your account").build());
+        .body(
+            ApplicationError.builder()
+                .message("You do not have sufficient balance in your account")
+                .build());
   }
 }

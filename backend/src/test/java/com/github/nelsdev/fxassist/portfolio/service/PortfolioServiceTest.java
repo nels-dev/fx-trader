@@ -16,33 +16,32 @@ import org.mockito.Mock;
 
 class PortfolioServiceTest {
 
-  @Mock
-  PortfolioRepository portfolioRepository;
-  @Mock
-  UserService userService;
+  @Mock PortfolioRepository portfolioRepository;
+  @Mock UserService userService;
 
-  @Mock
-  RateService rateService;
+  @Mock RateService rateService;
 
   private PortfolioService portfolioService;
 
   @BeforeEach
-  void setup(){
-    portfolioService=new PortfolioService(portfolioRepository, userService, rateService);
+  void setup() {
+    portfolioService = new PortfolioService(portfolioRepository, userService, rateService);
   }
+
   @Test
   void holdingPeriodReturn() {
-    //Example from https://www.fool.com/about/how-to-calculate-investment-returns/
+    // Example from https://www.fool.com/about/how-to-calculate-investment-returns/
     List<CashFlow> cashFlows =
         List.of(
             new CashFlow(null, new BigDecimal(0), new BigDecimal(20300), new BigDecimal(20300)),
             new CashFlow(null, new BigDecimal(21773), new BigDecimal(22273), new BigDecimal(500)),
             new CashFlow(null, new BigDecimal(23937), new BigDecimal(24437), new BigDecimal(500)),
             new CashFlow(null, new BigDecimal(22823), new BigDecimal(22573), new BigDecimal(-250)),
-            new CashFlow(null, new BigDecimal(24518), new BigDecimal(25018), new BigDecimal(500))
-               );
-    BigDecimal hpr = portfolioService.holdingPeriodReturn(cashFlows, new BigDecimal(25992)).subtract(BigDecimal.ONE);
+            new CashFlow(null, new BigDecimal(24518), new BigDecimal(25018), new BigDecimal(500)));
+    BigDecimal hpr =
+        portfolioService
+            .holdingPeriodReturn(cashFlows, new BigDecimal(25992))
+            .subtract(BigDecimal.ONE);
     assertThat(hpr.setScale(4, RoundingMode.HALF_UP)).isEqualByComparingTo("0.2149");
-
   }
 }

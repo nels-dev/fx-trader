@@ -6,7 +6,6 @@ import com.github.nelsdev.fxassist.portfolio.dto.CreatePortfolioRequest;
 import com.github.nelsdev.fxassist.portfolio.dto.PortfolioResponse;
 import com.github.nelsdev.fxassist.portfolio.exception.ActivePortfolioExistException;
 import com.github.nelsdev.fxassist.portfolio.service.PortfolioService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +24,7 @@ public class PortfolioController {
   private final PortfolioService service;
 
   @PostMapping
-  public void createPortfolio(@RequestBody CreatePortfolioRequest request){
+  public void createPortfolio(@RequestBody CreatePortfolioRequest request) {
     service.createPortfolio(request);
   }
 
@@ -35,7 +34,7 @@ public class PortfolioController {
   }
 
   @GetMapping("/allowed-currencies")
-  public Currency[] getAllowableCurrencies(){
+  public Currency[] getAllowableCurrencies() {
     return Currency.values();
   }
 
