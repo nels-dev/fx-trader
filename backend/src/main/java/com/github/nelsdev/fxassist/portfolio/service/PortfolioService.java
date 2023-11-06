@@ -6,6 +6,7 @@ import com.github.nelsdev.fxassist.portfolio.dto.CreatePortfolioRequest;
 import com.github.nelsdev.fxassist.portfolio.dto.PortfolioResponse;
 import com.github.nelsdev.fxassist.portfolio.entity.UserPortfolio;
 import com.github.nelsdev.fxassist.portfolio.entity.UserPortfolio.Balance;
+import com.github.nelsdev.fxassist.portfolio.entity.UserPortfolio.CashFlow;
 import com.github.nelsdev.fxassist.portfolio.exception.ActivePortfolioExistException;
 import com.github.nelsdev.fxassist.portfolio.repository.PortfolioRepository;
 import com.github.nelsdev.fxassist.rate.service.RateService;
@@ -16,13 +17,16 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class PortfolioService {
   private final PortfolioRepository portfolioRepository;
@@ -38,11 +42,10 @@ public class PortfolioService {
     UserPortfolio portfolio = new UserPortfolio();
     portfolio.setCreatedAt(Instant.now());
     portfolio.setBaseCurrency(request.getCurrency());
-    portfolio.setAmountDeposited(request.getAmount());
     portfolio.getBalances().add(new Balance(request.getCurrency(), request.getAmount()));
     portfolio.setActive(true);
     portfolio.setUserId(userId);
-    portfolio.setAmountWithdrawn(BigDecimal.ZERO);
+    portfolio.getCashFlow().add(new CashFlow(Instant.now(), BigDecimal.ZERO, request.getAmount(), request.getAmount()));
     portfolioRepository.save(portfolio);
   }
 
@@ -52,7 +55,7 @@ public class PortfolioService {
         portfolioRepository
             .findByUserIdAndActive(userId, true)
             .orElseThrow(ResourceNotFoundException::new);
-
+    BigDecimal totalValueBeforeCashFlow = getPortfolioTotalValueInBase(userPortfolio);
     // Add to currency balance
     Optional<Balance> curBalance =
         userPortfolio.getBalances().stream().filter(bal -> bal.getCurrency() == currency).findAny();
@@ -63,9 +66,13 @@ public class PortfolioService {
     }
 
     // Add to total deposit
-    BigDecimal amountInBase =
-        rateService.convert(currency, userPortfolio.getBaseCurrency(), amount);
-    userPortfolio.setAmountDeposited(userPortfolio.getAmountDeposited().add(amountInBase));
+    BigDecimal totalValueAfterCashFlow = getPortfolioTotalValueInBase(userPortfolio);
+
+    userPortfolio.getCashFlow().add(
+        new CashFlow(Instant.now(),
+                     totalValueBeforeCashFlow,
+                     totalValueAfterCashFlow,
+                     totalValueAfterCashFlow.subtract(totalValueBeforeCashFlow)));
     portfolioRepository.save(userPortfolio);
   }
 
@@ -82,13 +89,16 @@ public class PortfolioService {
             .filter(bal -> bal.getAmount().compareTo(amount) >= 0)
             .findFirst()
             .orElseThrow(InsufficientBalanceException::new);
-
+    BigDecimal totalValueBeforeCashFlow = getPortfolioTotalValueInBase(userPortfolio);
     curBalance.setAmount(curBalance.getAmount().subtract(amount));
 
     // Add to total withdrawal
-    BigDecimal amountInBase =
-        rateService.convert(currency, userPortfolio.getBaseCurrency(), amount);
-    userPortfolio.setAmountWithdrawn(userPortfolio.getAmountWithdrawn().add(amountInBase));
+    BigDecimal totalValueAfterCashFlow = getPortfolioTotalValueInBase(userPortfolio);
+    userPortfolio.getCashFlow().add(
+        new CashFlow(Instant.now(),
+                     totalValueBeforeCashFlow,
+                     totalValueAfterCashFlow,
+                     totalValueAfterCashFlow.subtract(totalValueBeforeCashFlow)));
     portfolioRepository.save(userPortfolio);
   }
 
@@ -131,27 +141,12 @@ public class PortfolioService {
             .findByUserIdAndActive(userId, true)
             .orElseThrow(ResourceNotFoundException::new);
 
-    BigDecimal balanceInBase =
-        userPortfolio.getBalances().stream()
-            .map(
-                balance ->
-                    rateService.convert(
-                        balance.getCurrency(),
-                        userPortfolio.getBaseCurrency(),
-                        balance.getAmount()))
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-    BigDecimal totalDepositWithdrawal = userPortfolio.getAmountDeposited().add(userPortfolio.getAmountWithdrawn());
-    BigDecimal percentageChange =
-        balanceInBase
-            .add(userPortfolio.getAmountWithdrawn())
-            .subtract(totalDepositWithdrawal)
-            .divide(totalDepositWithdrawal, 4, RoundingMode.HALF_UP);
+    final BigDecimal balanceInBase = getPortfolioTotalValueInBase(userPortfolio);
+    final BigDecimal percentageChange = holdingPeriodReturn(userPortfolio.getCashFlow(), balanceInBase).subtract(BigDecimal.ONE);
     var balancesMap =
         userPortfolio.getBalances().stream()
             .collect(Collectors.toMap(Balance::getCurrency, Balance::getAmount));
     return PortfolioResponse.builder()
-        .amountDeposited(userPortfolio.getAmountDeposited())
-        .amountWithdrawn(userPortfolio.getAmountWithdrawn())
         .baseCurrency(userPortfolio.getBaseCurrency())
         .createdAt(userPortfolio.getCreatedAt().atOffset(ZoneOffset.UTC))
         .balanceInBaseCurrency(balanceInBase)
@@ -159,5 +154,30 @@ public class PortfolioService {
         .balances(balancesMap)
         .allowedCurrencies(Set.of(Currency.values()))
                             .build();
+  }
+
+  BigDecimal holdingPeriodReturn(List<CashFlow> cashFlows, BigDecimal periodEndValue){
+    if(cashFlows.isEmpty()){
+      return BigDecimal.ONE;
+    }else{
+      CashFlow lastCf = cashFlows.get(cashFlows.size()-1);
+      BigDecimal lastPeriodReturn = periodEndValue
+          .subtract(lastCf.getPostCashFlowValue())
+          .divide(lastCf.getPostCashFlowValue(), 4, RoundingMode.HALF_UP)
+          .add(BigDecimal.ONE);
+      log.info("Period start: {}, Period end: {}, percentage: {}", lastCf.getPostCashFlowValue(), periodEndValue, lastPeriodReturn);
+      return holdingPeriodReturn(cashFlows.subList(0, cashFlows.size()-1), lastCf.getPreCashFlowValue()).multiply(lastPeriodReturn);
+    }
+  }
+
+  private BigDecimal getPortfolioTotalValueInBase(UserPortfolio userPortfolio) {
+    return userPortfolio.getBalances().stream()
+                     .map(
+                balance ->
+                    rateService.convert(
+                        balance.getCurrency(),
+                        userPortfolio.getBaseCurrency(),
+                        balance.getAmount()))
+                     .reduce(BigDecimal.ZERO, BigDecimal::add);
   }
 }

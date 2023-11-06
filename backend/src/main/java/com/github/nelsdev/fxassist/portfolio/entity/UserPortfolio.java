@@ -15,17 +15,25 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class UserPortfolio {
   @Id private String id;
   private Currency baseCurrency;
-  private BigDecimal amountDeposited;
-  private BigDecimal amountWithdrawn;
   private String userId;
   private List<Balance> balances = new ArrayList<>();
   private Instant createdAt;
   private boolean active;
+  private List<CashFlow> cashFlow = new ArrayList<>();
 
   @Data
   @AllArgsConstructor
   public static class Balance {
     private Currency currency;
     private BigDecimal amount;
+  }
+
+  @Data
+  @AllArgsConstructor
+  public static class CashFlow {
+    private Instant transactionTime;
+    private BigDecimal preCashFlowValue;
+    private BigDecimal postCashFlowValue;
+    private BigDecimal cashFlowValueInBase;
   }
 }

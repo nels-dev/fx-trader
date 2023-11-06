@@ -25,7 +25,7 @@ public class PortfolioController {
   private final PortfolioService service;
 
   @PostMapping
-  public void createPortfolio(@RequestBody @Valid CreatePortfolioRequest request) {
+  public void createPortfolio(@RequestBody CreatePortfolioRequest request){
     service.createPortfolio(request);
   }
 
