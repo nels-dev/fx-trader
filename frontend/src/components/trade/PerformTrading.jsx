@@ -22,7 +22,7 @@ import { trade } from "@/services/transaction.service";
 
 const OptionBox = ({option, text, selectedOption, onClick}) => {
   return(
-    <Card sx={{backgroundColor: option===selectedOption ? 'primary.light' : 'white', height: "100%"}} onClick={onClick}>
+    <Card sx={{backgroundColor: option===selectedOption ? 'primary.light' : 'white', height: "100%"}} onClick={onClick} variant="outlined">
       <CardActionArea sx={{p: 2, textAlign: 'center', height: "100%"}}>
         <Typography variant="button" color={option===selectedOption ? 'primary.contrastText' : ''}>{text}</Typography>
       </CardActionArea>

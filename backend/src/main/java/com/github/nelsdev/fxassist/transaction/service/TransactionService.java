@@ -1,6 +1,7 @@
 package com.github.nelsdev.fxassist.transaction.service;
 
 import com.github.nelsdev.fxassist.common.types.Currency;
+import com.github.nelsdev.fxassist.portfolio.entity.UserPortfolio;
 import com.github.nelsdev.fxassist.portfolio.service.PortfolioService;
 import com.github.nelsdev.fxassist.rate.service.RateService;
 import com.github.nelsdev.fxassist.transaction.dto.DepositRequest;
@@ -16,7 +17,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.ZoneOffset;
-import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -115,9 +115,10 @@ public class TransactionService {
   }
 
   public TransactionsResponse getUserTransactions() {
-    User user = userService.getCurrentUser();
+    UserPortfolio portfolio = portfolioService.getActivePortfolio();
+
     var transactions =
-        repository.findAllByUserIdAndTypeInOrderByCreatedAtDesc(user.getId(), Set.of(TransactionType.DEPOSIT, TransactionType.WITHDRAWAL)).stream()
+        repository.getTransfers(portfolio.getUserId(), portfolio.getCreatedAt()).stream()
             .map(TransactionService::map)
             .collect(Collectors.toList());
 
@@ -125,28 +126,25 @@ public class TransactionService {
   }
 
   public TransactionsResponse getTrades() {
-    User user = userService.getCurrentUser();
+    UserPortfolio portfolio = portfolioService.getActivePortfolio();
     var transactions =
-        repository.findAllByUserIdAndTypeInOrderByCreatedAtDesc(user.getId(), Set.of(TransactionType.TRADE)).stream()
-                  .map(TransactionService::map)
-                  .collect(Collectors.toList());
+        repository.getTransfers(portfolio.getUserId(), portfolio.getCreatedAt()).stream()
+            .map(TransactionService::map)
+            .collect(Collectors.toList());
 
     return TransactionsResponse.builder().transactions(transactions).build();
   }
 
-
   private static TransactionsResponse.Transaction map(Transaction t) {
     return TransactionsResponse.Transaction.builder()
-                                           .rate(t.getRate())
-                                           .toAmount(t.getToAmount())
-                                           .fromAmount(t.getFromAmount())
-                                           .fromCurrency(t.getFromCurrency())
-                                           .toCurrency(t.getToCurrency())
-                                           .createdAt(t.getCreatedAt()
-                                                       .atOffset(ZoneOffset.UTC))
-                                           .type(t.getType())
-                                           .userInputtedRate(t.isUserInputtedRate())
-                                           .build();
+        .rate(t.getRate())
+        .toAmount(t.getToAmount())
+        .fromAmount(t.getFromAmount())
+        .fromCurrency(t.getFromCurrency())
+        .toCurrency(t.getToCurrency())
+        .createdAt(t.getCreatedAt().atOffset(ZoneOffset.UTC))
+        .type(t.getType())
+        .userInputtedRate(t.isUserInputtedRate())
+        .build();
   }
-
 }

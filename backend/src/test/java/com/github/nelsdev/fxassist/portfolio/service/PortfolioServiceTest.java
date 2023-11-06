@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.nelsdev.fxassist.portfolio.entity.UserPortfolio.CashFlow;
 import com.github.nelsdev.fxassist.portfolio.repository.PortfolioRepository;
+import com.github.nelsdev.fxassist.portfolio.repository.PortfolioSnapshotRepository;
 import com.github.nelsdev.fxassist.rate.service.RateService;
 import com.github.nelsdev.fxassist.user.service.UserService;
 import java.math.BigDecimal;
@@ -17,6 +18,7 @@ import org.mockito.Mock;
 class PortfolioServiceTest {
 
   @Mock PortfolioRepository portfolioRepository;
+  @Mock PortfolioSnapshotRepository portfolioSnapshotRepository;
   @Mock UserService userService;
 
   @Mock RateService rateService;
@@ -25,7 +27,9 @@ class PortfolioServiceTest {
 
   @BeforeEach
   void setup() {
-    portfolioService = new PortfolioService(portfolioRepository, userService, rateService);
+    portfolioService =
+        new PortfolioService(
+            portfolioRepository, portfolioSnapshotRepository, userService, rateService);
   }
 
   @Test

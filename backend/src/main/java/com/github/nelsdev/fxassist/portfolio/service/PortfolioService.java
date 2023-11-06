@@ -7,8 +7,10 @@ import com.github.nelsdev.fxassist.portfolio.dto.PortfolioResponse;
 import com.github.nelsdev.fxassist.portfolio.entity.UserPortfolio;
 import com.github.nelsdev.fxassist.portfolio.entity.UserPortfolio.Balance;
 import com.github.nelsdev.fxassist.portfolio.entity.UserPortfolio.CashFlow;
+import com.github.nelsdev.fxassist.portfolio.entity.UserPortfolioSnapshot;
 import com.github.nelsdev.fxassist.portfolio.exception.ActivePortfolioExistException;
 import com.github.nelsdev.fxassist.portfolio.repository.PortfolioRepository;
+import com.github.nelsdev.fxassist.portfolio.repository.PortfolioSnapshotRepository;
 import com.github.nelsdev.fxassist.rate.service.RateService;
 import com.github.nelsdev.fxassist.transaction.entity.Transaction;
 import com.github.nelsdev.fxassist.transaction.exception.InsufficientBalanceException;
@@ -30,6 +32,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class PortfolioService {
   private final PortfolioRepository portfolioRepository;
+  private final PortfolioSnapshotRepository portfolioSnapshotRepository;
   private final UserService userService;
   private final RateService rateService;
 
@@ -48,16 +51,41 @@ public class PortfolioService {
         .getCashFlow()
         .add(
             new CashFlow(Instant.now(), BigDecimal.ZERO, request.getAmount(), request.getAmount()));
-    portfolioRepository.save(portfolio);
+    portfolio = portfolioRepository.save(portfolio);
+    takeSnapshot(portfolio);
+  }
 
+  public void takeSnapshotForAllActivePortfolio() {
+    portfolioRepository.findAll().stream()
+        .filter(UserPortfolio::isActive)
+        .forEach(this::takeSnapshot);
+  }
+
+  private void takeSnapshot(UserPortfolio userPortfolio) {
+    UserPortfolioSnapshot snapshot = new UserPortfolioSnapshot();
+    snapshot.setSnapshotTime(Instant.now());
+    snapshot.setUserId(userPortfolio.getUserId());
+    snapshot.setPortfolioId(userPortfolio.getId());
+    snapshot.setBaseCurrency(userPortfolio.getBaseCurrency());
+    snapshot.setTotalValue(getPortfolioTotalValueInBase(userPortfolio));
+    portfolioSnapshotRepository.save(snapshot);
+  }
+
+  public UserPortfolio getActivePortfolio() {
+    String userId = userService.getCurrentUser().getId();
+    return portfolioRepository
+        .findByUserIdAndActive(userId, true)
+        .orElseThrow(ResourceNotFoundException::new);
+  }
+
+  public List<UserPortfolioSnapshot> getSnapshots() {
+    UserPortfolio portfolio = getActivePortfolio();
+    return portfolioSnapshotRepository.findByUserIdAndPortfolioId(
+        portfolio.getUserId(), portfolio.getId());
   }
 
   public void depositToActivePortfolio(Currency currency, BigDecimal amount) {
-    String userId = userService.getCurrentUser().getId();
-    UserPortfolio userPortfolio =
-        portfolioRepository
-            .findByUserIdAndActive(userId, true)
-            .orElseThrow(ResourceNotFoundException::new);
+    final UserPortfolio userPortfolio = getActivePortfolio();
     BigDecimal totalValueBeforeCashFlow = getPortfolioTotalValueInBase(userPortfolio);
     // Add to currency balance
     Optional<Balance> curBalance =
@@ -80,14 +108,11 @@ public class PortfolioService {
                 totalValueAfterCashFlow,
                 totalValueAfterCashFlow.subtract(totalValueBeforeCashFlow)));
     portfolioRepository.save(userPortfolio);
+    takeSnapshot(userPortfolio);
   }
 
   public void withdrawFromActivePortfolio(Currency currency, BigDecimal amount) {
-    String userId = userService.getCurrentUser().getId();
-    UserPortfolio userPortfolio =
-        portfolioRepository
-            .findByUserIdAndActive(userId, true)
-            .orElseThrow(ResourceNotFoundException::new);
+    final UserPortfolio userPortfolio = getActivePortfolio();
 
     Balance curBalance =
         userPortfolio.getBalances().stream()
@@ -109,14 +134,11 @@ public class PortfolioService {
                 totalValueAfterCashFlow,
                 totalValueAfterCashFlow.subtract(totalValueBeforeCashFlow)));
     portfolioRepository.save(userPortfolio);
+    takeSnapshot(userPortfolio);
   }
 
   public void recordTradeTransaction(Transaction transaction) {
-    String userId = userService.getCurrentUser().getId();
-    UserPortfolio userPortfolio =
-        portfolioRepository
-            .findByUserIdAndActive(userId, true)
-            .orElseThrow(ResourceNotFoundException::new);
+    final UserPortfolio userPortfolio = getActivePortfolio();
 
     Balance fromBalance = null;
     Balance toBalance = null;
@@ -141,14 +163,11 @@ public class PortfolioService {
     fromBalance.setAmount(fromBalance.getAmount().subtract(transaction.getFromAmount()));
     toBalance.setAmount(toBalance.getAmount().add(transaction.getToAmount()));
     portfolioRepository.save(userPortfolio);
+    takeSnapshot(userPortfolio);
   }
 
   public PortfolioResponse getPortfolio() {
-    String userId = userService.getCurrentUser().getId();
-    UserPortfolio userPortfolio =
-        portfolioRepository
-            .findByUserIdAndActive(userId, true)
-            .orElseThrow(ResourceNotFoundException::new);
+    final UserPortfolio userPortfolio = getActivePortfolio();
 
     final BigDecimal balanceInBase = getPortfolioTotalValueInBase(userPortfolio);
     final BigDecimal percentageChange =
@@ -176,11 +195,6 @@ public class PortfolioService {
               .subtract(lastCf.getPostCashFlowValue())
               .divide(lastCf.getPostCashFlowValue(), 4, RoundingMode.HALF_UP)
               .add(BigDecimal.ONE);
-      log.info(
-          "Period start: {}, Period end: {}, percentage: {}",
-          lastCf.getPostCashFlowValue(),
-          periodEndValue,
-          lastPeriodReturn);
       return holdingPeriodReturn(
               cashFlows.subList(0, cashFlows.size() - 1), lastCf.getPreCashFlowValue())
           .multiply(lastPeriodReturn);

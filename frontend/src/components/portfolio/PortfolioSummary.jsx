@@ -42,14 +42,14 @@ const PortfolioSummary = () => {
                       portf.balanceInBaseCurrency)}`}
                 </Typography>
                 <Typography variant="subtitle2">Portfolio total
-                  value </Typography>
+                  value in base currency</Typography>
                 <Typography variant="h4"
                             sx={{mt: 2, mb: 2}}>{portf.percentageChange >= 0
                     ? "+" : ""}{Number(portf.percentageChange * 100).toFixed(
                     2)}%</Typography>
-                <Typography variant="subtitle2">Performance since {new Date(
+                <Typography variant="subtitle2">Holding Period Return since {new Date(
                     portf.createdAt).toLocaleDateString()}</Typography>
-                <Stack spacing={2} direction="row" sx={{mt: 2}}>
+                <Stack spacing={2} direction="row" sx={{mt: 5}}>
                   <Button variant="contained" color='primary' component={Link}
                           to="/trade">Perform trade</Button>
                   <Button variant="outlined" color='primary' component={Link}
