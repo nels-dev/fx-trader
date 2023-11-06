@@ -17,12 +17,12 @@ const AlertBox = () => {
   const handleClose = () => setPayload({...payload, open: false})
   return (
       <Snackbar
-          anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
+          anchorOrigin={{vertical: 'top', horizontal: 'center'}}
           autoHideDuration={6000}
           open={payload.open}
           onClose={handleClose}
       >
-        <Alert variant='standard' severity={payload.type || 'info'}
+        <Alert variant='filled' severity={payload.type || 'info'}
                sx={{minWidth: 300}}>
           <AlertTitle>
             {payload.title}

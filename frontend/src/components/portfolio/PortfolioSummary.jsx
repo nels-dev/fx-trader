@@ -62,7 +62,7 @@ const PortfolioSummary = () => {
               <BalanceTable balances={portf.balances}/>
             </Grid>
             <Grid xs={12}>
-              <PortfolioChart/>
+              <PortfolioChart baseCurrency={portf.baseCurrency}/>
             </Grid>
           </Grid>
           </Box>

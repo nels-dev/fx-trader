@@ -7,7 +7,7 @@ import 'chartjs-adapter-moment'
 import { useTheme } from "@emotion/react";
 Chart.register(TimeScale, LinearScale, PointElement,LineElement);
 
-const PortfolioChart = () => {
+const PortfolioChart = ({baseCurrency}) => {
     const theme = useTheme()
     var minDate = new Date();
     minDate.setDate(minDate.getDate()-2)
@@ -15,7 +15,7 @@ const PortfolioChart = () => {
     useEffect(()=>{
         getSnapshots().then(({data})=>setData(data.map(snapshot=>({x:snapshot.snapshotTime, y: snapshot.totalValue}))) )
     }, [])
-    return ( <ContentBox title="Portfolio Value">
+    return ( <ContentBox title={`Portfolio Value (in ${baseCurrency})`}>
 
         <Line
         data={{
