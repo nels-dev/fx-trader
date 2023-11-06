@@ -128,7 +128,7 @@ public class TransactionService {
   public TransactionsResponse getTrades() {
     UserPortfolio portfolio = portfolioService.getActivePortfolio();
     var transactions =
-        repository.getTransfers(portfolio.getUserId(), portfolio.getCreatedAt()).stream()
+        repository.getTrades(portfolio.getUserId(), portfolio.getCreatedAt()).stream()
             .map(TransactionService::map)
             .collect(Collectors.toList());
 

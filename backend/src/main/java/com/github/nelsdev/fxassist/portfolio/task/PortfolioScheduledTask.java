@@ -16,7 +16,7 @@ public class PortfolioScheduledTask {
    * For fast prototyping purpose it is implemented as a standalone scheduled job, not scalable when
    * multiple instances come into play
    */
-  @Scheduled(cron = "0 0 * * * *")
+  @Scheduled(cron = "5 0 * * * *")
   public void takePortfolioSnapshot() {
     portfolioService.takeSnapshotForAllActivePortfolio();
   }
