@@ -36,7 +36,9 @@ public class PortfolioController {
   }
 
   @GetMapping("/snapshots")
-  public List<UserPortfolioSnapshot> getSnapshots() { return service.getSnapshots(); }
+  public List<UserPortfolioSnapshot> getSnapshots() {
+    return service.getSnapshots();
+  }
 
   @GetMapping("/allowed-currencies")
   public Currency[] getAllowableCurrencies() {

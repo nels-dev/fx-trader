@@ -1,6 +1,7 @@
 import requests
 import os
 import pymongo
+import datetime
 def handle(event, context):
     api_key = os.environ['FIXER_API_KEY']
     host = os.environ['MONGO_HOST']
@@ -21,5 +22,9 @@ def handle(event, context):
     collection = db['quotes']
     collection.delete_many({})
     collection.insert_many(converted_rates)
+    
+    quote_hist = db['quotes_history']
+    quote_hist.insert_one({"updated": datetime.datetime.now(tz=datetime.timezone.utc), "rates": converted_rates})
+    client.close()
 
     

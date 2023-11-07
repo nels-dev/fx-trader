@@ -8,6 +8,7 @@ import Funding from "../components/funding/Funding";
 import Trade from "../components/trade/Trade";
 import Notifications from "../components/notifications/Notifications";
 import Register from "../components/public/Register";
+import Market from "@/components/market/Market";
 
 const routes = [
   {
@@ -41,6 +42,9 @@ const routes = [
             }, {
               path: "notification",
               element: <Notifications/>
+            }, {
+              path: "market",
+              element: <Market/>
             }]
           }
         ]

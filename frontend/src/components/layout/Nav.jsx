@@ -16,6 +16,10 @@ const Nav = () => {
       </Grid>
       <Grid>
         <Button sx={{p: 2, fontWeight: 500}} component={Link} size="large"
+                to="/market">Market</Button>
+      </Grid>
+      <Grid>
+        <Button sx={{p: 2, fontWeight: 500}} component={Link} size="large"
                 to="/trade">Trade</Button>
       </Grid>
       <Grid>

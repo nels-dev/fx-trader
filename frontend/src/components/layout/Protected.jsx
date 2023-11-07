@@ -6,7 +6,7 @@ const Protected = () => {
   const { token, apiSetupComplete } = useAuth();
   const navigate = useNavigate();
   useEffect(() => {
-    if (apiSetupComplete && !token) {
+    if (!token) {
       navigate(`/login`)
     }
   }, [token])

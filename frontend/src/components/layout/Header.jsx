@@ -10,7 +10,7 @@ const Header = () => {
         sx={{pt: 3, pb: 1}}
         container alignContent="stretch"
     >
-      <Grid>
+      <Grid xs={6} md={4}>
         <img src={logo} width='100%'/>
       </Grid>
       <Grid xs>
