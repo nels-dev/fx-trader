@@ -1,14 +1,15 @@
 import {
   Button,
   Box,
-  InputLabel,
   MenuItem,
   Select,
   TextField,
   Typography,
   Card,
   CardActionArea,
-  Alert
+  Checkbox,
+  FormControlLabel,
+  InputAdornment
 } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import { useEffect, useState } from "react";
@@ -21,6 +22,8 @@ import {
   getPortfolio
 } from "@/services/portfolio.service.js";
 import { getQuote, trade } from "@/services/transaction.service";
+import { AccountCircle, Calculate } from "@mui/icons-material";
+
 
 const OptionBox = ({ option, text, selectedOption, onClick }) => {
   return (
@@ -34,8 +37,9 @@ const OptionBox = ({ option, text, selectedOption, onClick }) => {
 
 
 const PerformTrading = () => {
-  const [option, setOption] = useState('specifySell')
-  const [quote, setQuote] = useState()
+  const [recordTrade, setRecordTrade] = useState(false)
+  const [fixBuy, setFixBuy] = useState(false)
+  const [quote, setQuote] = useState({from:'', to:'', rate:0})
   const navigate = useNavigate();
   const [form, setForm] = useState({ fromCurrency: '', toCurrency: '', fromAmount: '0', toAmount: '0' })
   const [portf, setPortf] = useState({ balances: {} })
@@ -61,32 +65,75 @@ const PerformTrading = () => {
   useEffect(() => {
 
     if (form.fromCurrency && form.toCurrency) {
-      getQuote(form.fromCurrency, form.toCurrency)
+      if(recordTrade){
+        setQuote({
+          from: form.fromCurrency, 
+          to: form.toCurrency, 
+          rate: Number(form.fromAmount) > 0 ? Number(form.toAmount)/Number(form.fromAmount) : 0
+        })
+      }else{
+        getQuote(form.fromCurrency, form.toCurrency)
         .then(({ data }) => {          
           setQuote(data)
+          if(fixBuy){
+            setForm({...form, fromAmount: calculateSellAmount(form.toAmount, data.rate)})
+          }else{
+            setForm({...form, toAmount: calculateBuyAmount(form.fromAmount, data.rate)})
+          }
         })
+      }      
     }
-  }, [form.fromCurrency, form.toCurrency])
+  }, [form.fromCurrency, form.toCurrency, recordTrade])
 
-  useEffect(()=>{
-    if(quote && option==='specifySell'){
-      setForm({...form, toAmount: (Number(form.fromAmount) * quote.rate).toFixed(2)})
+  const calculateSellAmount = (buyAmountStr, rate) =>{
+    if(Number(buyAmountStr) > 0 && rate > 0){
+      return (Number(buyAmountStr) / rate).toFixed(2)
+    }else{
+      return '0.00';
     }
-  }, [form.fromAmount, quote])
+  }
+  
+  const calculateBuyAmount = (sellAmountStr, rate)=>{
+    if(Number(sellAmountStr) > 0 && rate > 0){
+      return (Number(sellAmountStr) * rate).toFixed(2)
+    }else{
+      return '0.00';
+    }
+  }
 
-  useEffect(()=>{
-    if(quote && option==='specifyBuy'){
-      setForm({...form, fromAmount: (Number(form.toAmount) * quote.reverseRate).toFixed(2) })
+  const changeFromAmount = ({target: {value}})=>{    
+    if(recordTrade){
+      setForm({...form, fromAmount: value})
+      value >0 && setQuote({ ...quote, rate: (Number(form.toAmount)/ Number(value))})
+    }else{
+      setFixBuy(false)
+      setForm({
+        ...form, 
+        fromAmount: value, 
+        toAmount: calculateBuyAmount(value, quote.rate)})
     }
-  }, [form.toAmount, quote])
+  }
+
+  const changeToAmount = ({target: {value}})=>{
+    if(recordTrade){
+      setForm({...form, toAmount: value})
+      value >0 && setQuote({ ...quote, rate: (Number(value)/ Number(form.fromAmount))})
+    }else{
+      setFixBuy(true)
+      setForm({
+        ...form, 
+        toAmount: value, 
+        fromAmount: calculateSellAmount(value, quote.rate)})
+    }
+  }
 
   const submit = () => {
     let request = { fromCurrency: form.fromCurrency, toCurrency: form.toCurrency }
-    if (option === 'specifySell' || option == 'specifyBoth') {
+    if (recordTrade || !fixBuy) {
       request.fromAmount = Number(form.fromAmount)
     }
 
-    if (option === 'specifyBuy' || option == 'specifyBoth') {
+    if (recordTrade || fixBuy) {
       request.toAmount = Number(form.toAmount)
     }
 
@@ -115,18 +162,7 @@ const PerformTrading = () => {
 
       </Grid>
       <Grid xs={12} md={8}>
-        <ContentBox title='Trade'>
-          <Grid container gap={2} sx={{ mt: 2, mb: 2 }}>
-            <Grid sm>
-              <OptionBox option="specifySell" selectedOption={option} text="Specify Sell Amount" onClick={() => setOption("specifySell")} />
-            </Grid>
-            <Grid sm>
-              <OptionBox option="specifyBuy" selectedOption={option} text="Specify Buy Amount" onClick={() => setOption("specifyBuy")} />
-            </Grid>
-            <Grid sm>
-              <OptionBox option="specifyBoth" selectedOption={option} text="Specify Both (record trade)" onClick={() => setOption("specifyBoth")} />
-            </Grid>
-          </Grid>
+        <ContentBox title='Trade'>          
           <form>
             <Box sx={{ mt: 2, mb: 2 }}>
               <Typography gutterBottom variant="body1">I am Selling</Typography>
@@ -145,10 +181,16 @@ const PerformTrading = () => {
                 required
                 fullWidth
                 label="Amount"
-                value={form.fromAmount}
-                disabled={option === 'specifyBuy'}
-                onChange={({ target: { value } }) => setForm(
-                  { ...form, fromAmount: value })}
+                InputProps={{
+                  startAdornment: 
+                    !recordTrade && fixBuy && (
+                      <InputAdornment position="start">
+                      <Calculate />
+                    </InputAdornment>
+                    )   
+                }}
+                value={form.fromAmount}                
+                onChange={changeFromAmount}
               />
             </Box>
             <Box sx={{ mt: 2, mb: 2 }}>
@@ -170,20 +212,38 @@ const PerformTrading = () => {
                 type="number"
                 fullWidth
                 label="Amount"
-                disabled={option === 'specifySell'}
+                InputProps={{
+                  startAdornment: 
+                    !recordTrade && !fixBuy && (
+                      <InputAdornment position="start">
+                      <Calculate />
+                    </InputAdornment>
+                    )   
+                }}
                 value={form.toAmount}
-                onChange={({ target: { value } }) => setForm(
-                  { ...form, toAmount: value })}
+                onChange={changeToAmount}
               />
             </Box>
-            {quote && option !== 'specifyBoth' && (
+            <FormControlLabel control={ <Checkbox
+              checked = {recordTrade}
+              onChange = {()=> setRecordTrade(!recordTrade)}
+            />} label="I want to record a previous trade"/>
+            {quote && (
               <Box sx={{ mt: 2, mb: 2 }}>
-              <Typography gutterBottom variant="body1">Real time exchange rate</Typography>
+              <Typography variant="body1">{recordTrade ? 'Exchange rate implied from my input' : 'Real time exchange rate'}</Typography>
               <TextField
                 contentEditable={false}
                 margin="normal"                
-                fullWidth                
-                value={`${quote.from}/${quote.to} ${Number(quote.rate).toFixed(4)}`}
+                fullWidth            
+                InputProps={{
+                  startAdornment: 
+                    recordTrade && (
+                      <InputAdornment position="start">
+                      <Calculate />
+                    </InputAdornment>
+                    )   
+                }}    
+                value={form.fromCurrency && form.toCurrency && `${quote.from}/${quote.to} ${Number(quote.rate).toFixed(4)}`}
               />
             </Box>
             )}
