@@ -47,10 +47,6 @@ public class PortfolioService {
     portfolio.setBaseCurrency(request.getCurrency());
     portfolio.setActive(true);
     portfolio.setUserId(userId);
-    portfolio
-        .getCashFlow()
-        .add(
-            new CashFlow(Instant.now(), BigDecimal.ZERO, request.getAmount(), request.getAmount()));
     portfolio = portfolioRepository.save(portfolio);
     takeSnapshot(portfolio);
   }

@@ -35,16 +35,23 @@ const PerformFunding = () => {
     if (preCreate) {
       createPortfolio(form)
       .then(() => {
-        doAlert({
-          message: 'You have successfully funded your account',
-          type: 'success',
-          title: 'Portfolio Created!'
+        deposit(form)
+        .then(()=>{
+          doAlert({
+            message: 'You have successfully funded your account',
+            type: 'success',
+            title: 'Portfolio Created!'
+          })
+          navigate("/")  
         })
-        navigate("/")
+        .catch((error) => doAlert({
+          message: `Cannot fund your account. ${error.response?.data?.message
+          || ''}`, type: 'error', title: 'Deposit Failed!'
+        }))
       })
       .catch((error) => doAlert({
-        message: `Cannot fund your account. ${error.response?.data?.message
-        || ''}`, type: 'error', title: 'Deposit Failed!'
+        message: `Cannot create portfolio. ${error.response?.data?.message
+        || ''}`, type: 'error', title: 'Portfolio creation Failed!'
       }))
     } else {
       deposit(form)
