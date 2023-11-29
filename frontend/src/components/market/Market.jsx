@@ -2,7 +2,6 @@ import { getAllQuote, getPrediction, getQuoteHistory } from "@/services/transact
 import { useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
 import { useTheme } from "@emotion/react";
-import { TimeScale, LinearScale, PointElement, LineElement, Chart } from "chart.js";
 import 'chartjs-adapter-moment'
 import { Grid, List, ListItem, ListItemButton, ListItemText, Box, Typography, Alert, Card, CardContent, Chip } from "@mui/material";
 import ContentBox from "../layout/ContentBox";
@@ -112,17 +111,23 @@ const Market = () => {
 
                     </Grid>
                     <Grid xs={12} md={9}>
-                        {selectedCurrency && (<>
-                            <Typography variant="h6" gutterBottom>
-                                USD / {selectedCurrency} exchange rate
-                            </Typography>
+                        {selectedCurrency && (<>                            
                             <Line
                                 data={{
                                     datasets: [{ data }]
                                 }}
                                 options={{
                                     elements: { point: { radius: 0 }, line: { tension: 0.3, borderColor: theme.palette.primary.light } },
-
+                                    interaction:{
+                                        intersect: false
+                                    },
+                                    responsive: true,
+                                    plugins:{
+                                        title: {
+                                           display: true,
+                                            text:`USD / ${selectedCurrency} exchange rate`
+                                        }
+                                    },
                                     scales: {
                                         x: { type: 'time', time: { unit: 'day' }, suggestedMin: minDate.toISOString() },
                                     }

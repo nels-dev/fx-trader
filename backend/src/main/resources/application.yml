@@ -1,9 +1,10 @@
 ## A random 64-character string for signing JWT tokens. Can be overridden in server for security
 jwt:
   secret: odxiEs8dH2LbSecV14g41JtXUwhdSIdZKFgp7Kb4neEptRVYztjyB0J2r1Wyu5iv
-
 spring:
   data:
     mongodb:
       database: main
       uri: mongodb+srv://fx-trader-app-user:${MONGODB_PASSWORD}@main.0k9qtgy.mongodb.net/?retryWrites=true&w=majority
+email:
+  sender: fxassist.csis4495@gmail.com

@@ -20,6 +20,7 @@ public class NotificationScheduledTask {
    */
   @Scheduled(cron = "10 0 * * * *")
   public void sendNotification() {
+    log.info("Job started");
     notificationRuleService.sendNotification();
   }
 }

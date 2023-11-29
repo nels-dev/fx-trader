@@ -1,6 +1,7 @@
 package com.github.nelsdev.fxassist.notification.service;
 
 import com.github.nelsdev.fxassist.common.exception.ResourceNotFoundException;
+import com.github.nelsdev.fxassist.config.EmailConfig;
 import com.github.nelsdev.fxassist.notification.dto.AddNotificationRuleRequest;
 import com.github.nelsdev.fxassist.notification.dto.NotificationRulesResponse;
 import com.github.nelsdev.fxassist.notification.dto.brevo.CreateContactRequest;
@@ -32,6 +33,7 @@ public class NotificationRuleService {
   private final UserService userService;
   private final RateService rateService;
   private final BrevoApiClient emailClient;
+  private final EmailConfig emailConfig;
 
   public void addRule(AddNotificationRuleRequest request) {
     String userId = userService.getCurrentUser().getId();
@@ -93,10 +95,8 @@ public class NotificationRuleService {
       if (rule.isActive()) {
         QuoteResponse quote = rateService.getQuote(rule.getSellCurrency(), rule.getBuyCurrency());
         if (rule.getTargetType() == TargetType.UPPER) {
-          // reactivate when actual falls below threshold
           if (quote.getRate().compareTo(rule.getTarget()) >= 0) notify(rule, quote);
         } else {
-          // reactivate when actual rise above threshold
           if (quote.getRate().compareTo(rule.getTarget()) <= 0) notify(rule, quote);
         }
       } else {
@@ -111,7 +111,7 @@ public class NotificationRuleService {
     User user = userService.getById(rule.getUserId());
     EmailDto dto =
         EmailDto.builder()
-            .sender(new Party("FXAssist", "fxassist.csis4495@gmail.com"))
+            .sender(new Party("FXAssist", emailConfig.getSender()))
             .to(List.of(new Party(user.getFirstName(), user.getEmail())))
             .subject(
                 String.format(

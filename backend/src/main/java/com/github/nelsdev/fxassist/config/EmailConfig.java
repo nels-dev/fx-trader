@@ -10,4 +10,5 @@ import org.springframework.context.annotation.Configuration;
 public class EmailConfig {
 
   private String apiKey;
+  private String sender;
 }
