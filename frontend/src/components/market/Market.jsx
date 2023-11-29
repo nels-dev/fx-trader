@@ -3,34 +3,40 @@ import { useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
 import { useTheme } from "@emotion/react";
 import 'chartjs-adapter-moment'
-import { Grid, List, ListItem, ListItemButton, ListItemText, Box, Typography, Alert, Card, CardContent, Chip } from "@mui/material";
+import { Grid, List, ListItem, ListItemButton, ListItemText, Box, Typography, Alert, Card, CardContent, Chip, useMediaQuery, Button } from "@mui/material";
 import ContentBox from "../layout/ContentBox";
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import DragHandleIcon from '@mui/icons-material/DragHandle';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import moment from "moment";
+import Loading from "../layout/Loading";
 
 
 const Market = () => {
     var minDate = new Date();
     const theme = useTheme()
+    const desktop = useMediaQuery(theme.breakpoints.up('sm'));
     minDate.setDate(minDate.getDate() - 2)
     const [data, setData] = useState([])
+    const [loadingQuotes, setLoadingQuotes] = useState(false)
+    const [loadingChart, setLoadingChart] = useState(false)
     const [allQuotes, setAllQuotes] = useState([])
     const [prediction, setPrediction] = useState({ iconType: 'steady', title: '', desc: '', currency: '', notFound: false})
     const [selectedCurrency, setSelectedCurrency] = useState()
     useEffect(() => {
         if (selectedCurrency) {
+            setLoadingChart(true)
             getQuoteHistory(selectedCurrency)
                 .then(({ data }) => setData(data.quoteHistory.map(hist => ({ x: hist.updated, y: hist.rate }))))
+                .finally(()=> setLoadingChart(false))
             getPrediction(selectedCurrency)
                 .then(({data}) => {
                     setPrediction({
                         ...data, 
                         iconType: getIconType(data.predictedZScore),
                         title: titleText(data.predictedZScore),
-                        desc: `Our system predicts that the opening USD/${data.currency} rate on ${moment(data.date).add(1, 'days').format('L')} (GMT) ${descText(data.predictedZScore)}`
+                        desc: `Our system predicts that the opening USD/${data.currency} rate on ${moment(data.date).add(1, 'days').format('ll')} (GMT) ${descText(data.predictedZScore)}`
                     });
                 })
                 .catch(({error}) =>{ 
@@ -39,8 +45,13 @@ const Market = () => {
         }
     }, [selectedCurrency])
     useEffect(() => {
+        setLoadingQuotes(true)
         getAllQuote()
-            .then(({ data }) => setAllQuotes(data))
+            .then(({ data }) => {
+                setAllQuotes(data.filter(q=>q.currency!=='USD'))
+                setSelectedCurrency(data[0].currency)
+            })
+            .finally(()=>setLoadingQuotes(false))
     }, [])
 
     const titleText = (zscore) => {
@@ -83,11 +94,14 @@ const Market = () => {
     return (
         <Box sx={{ mt: 3, mb: 3 }}>
             <ContentBox title="Market Data">
+                
                 <Grid container>
-                    <Grid xs={12} md={3}>
-
+                    {desktop && (
+                        <Grid md={3}>
+                        <Loading loading = {loadingQuotes}>
                         <List dense>
-                            {allQuotes.map(q => (<ListItem sx={{borderLeft: selectedCurrency===q.currency? 3 :0, borderLeftColor: 'primary.main'}}>
+                            {allQuotes.map(q => (
+                            <ListItem sx={{borderLeft: selectedCurrency===q.currency? 3 :0, borderLeftColor: 'primary.main'}} key={q.currency}>
                                 <ListItemButton onClick={() => setSelectedCurrency(q.currency)}>
                                     <ListItemText primary={
                                         <>
@@ -108,10 +122,30 @@ const Market = () => {
                                 </ListItemButton>
                             </ListItem>))}
                         </List>
-
+                        </Loading>
                     </Grid>
+                    )}     
+                    {!desktop && (
+                        <Grid item sm container  spacing={1}>
+                            {allQuotes.map(q=>(
+                                <Grid item xs={4} key={q.currency}>
+                                    <Button variant={selectedCurrency===q.currency ? "contained":undefined} onClick={() => setSelectedCurrency(q.currency)}>
+                                        <div>
+                                            <Typography variant="caption">
+                                                USD / <strong>{q.currency}</strong>
+                                            </Typography><br/>
+                                            <Typography variant="caption">
+                                                {Number(q.rate).toFixed(4)}
+                                            </Typography>
+                                        </div>
+                                    </Button>
+                                </Grid>    
+                            ))}
+                            
+                        </Grid>
+                    )}               
                     <Grid xs={12} md={9}>
-                        {selectedCurrency && (<>                            
+                        {selectedCurrency && (<Loading loading={loadingChart}>                            
                             <Line
                                 data={{
                                     datasets: [{ data }]
@@ -146,8 +180,8 @@ const Market = () => {
                                             </Typography>
                                         </Grid>
                                         <Grid item xs>
-                                            <Typography color='secondary.contrastText' gutterBottom variant="h6" >{prediction.title}<Chip sx={{ml: 3}} icon={<AutoFixHighIcon/>} label='AI assisted' color="secondary"></Chip></Typography>
-                                            <Typography color='secondary.contrastText' >{prediction.desc}</Typography>
+                                            <Typography color='secondary.contrastText' gutterBottom variant="h6" >{prediction.title}&nbsp;&nbsp; <Chip icon={<AutoFixHighIcon/>} label='AI assisted' color="secondary"></Chip></Typography>
+                                            <Typography color='secondary.contrastText' variant="body1" >{prediction.desc}</Typography>
                                         </Grid>
                                         <Grid item>
                                             
@@ -156,12 +190,12 @@ const Market = () => {
                                 </CardContent>
                             </Card>
                             )}
-                        </>)}
-                        {!selectedCurrency && (<Alert severity="info">Select a currency from the list to see the chart</Alert>)}
+                         </Loading>)}
 
                     </Grid>
 
                 </Grid>
+               
             </ContentBox>
         </Box>
     );

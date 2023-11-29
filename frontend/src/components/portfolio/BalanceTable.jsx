@@ -1,6 +1,5 @@
 import ContentBox from "@/components/layout/ContentBox";
 import {Table, TableBody, TableCell, TableRow, Typography} from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2";
 import {useEffect, useState} from "react";
 import {getPortfolio} from "../../services/portfolio.service";
 import {formatAmount} from "../../utils/number.utils";

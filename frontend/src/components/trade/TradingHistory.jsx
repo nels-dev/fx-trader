@@ -1,4 +1,5 @@
 import {
+  Box,
     Table,
     TableBody,
     TableCell,
@@ -11,6 +12,7 @@ import {getTrades} from "../../services/transaction.service";
 import {formatAmount} from "../../utils/number.utils";
 import ContentBox from "../layout/ContentBox";
 import Loading from "../layout/Loading";
+import moment from "moment";
 
 const TradingHistory = () => {
   const [transactions, setTransactions] = useState([])
@@ -21,10 +23,10 @@ const TradingHistory = () => {
     .then(({data}) => setTransactions(data.transactions))
     .finally(() => setLoading(false))
   }, [])
-  return (<>
-        {loading && <Loading/>}
-        {!loading && (
+  return (<Loading loading={loading}>
+            
             <TableContainer component={ContentBox} title="Trade history">
+            <Box sx={{width: '100%', overflow: 'scroll'}}>
               <Table>
 
                 <TableHead>
@@ -39,21 +41,21 @@ const TradingHistory = () => {
                   {
                     transactions.map(row => (
                         <TableRow key={row.createdAt}>
-                          <TableCell>{new Date(
-                              row.createdAt).toLocaleDateString()}</TableCell>
+                          <TableCell>{moment(
+                              row.createdAt).format('l')}</TableCell>
                           <TableCell>{row.fromCurrency} {formatAmount(
                               row.fromAmount)}</TableCell>
                           <TableCell>{row.toCurrency} {formatAmount(
                               row.toAmount)}</TableCell>
-                          <TableCell>{row.rate}</TableCell>
+                          <TableCell>{Number(row.rate).toFixed(4)}</TableCell>
                         </TableRow>
                     ))
                   }
                 </TableBody>
-              </Table>
+              </Table>  </Box>
             </TableContainer>
-        )}
-      </>
+          
+      </Loading>
   );
 }
 

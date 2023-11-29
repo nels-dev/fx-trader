@@ -2,16 +2,20 @@ import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { Link, NavLink } from "react-router-dom";
 import logo from "../../assets/logo.svg"
 import CloseIcon from '@mui/icons-material/Close';
-
-import { Box, Button, Divider, IconButton, List, ListItemButton, ListItemText, ListSubheader, useMediaQuery, useTheme } from "@mui/material";
+import FolderIcon from '@mui/icons-material/FolderSpecial'
+import TimelineIcon from '@mui/icons-material/Timeline'
+import SyncAltIcon from '@mui/icons-material/SyncAlt'
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import { Box, Button, Divider, IconButton, List, ListItemButton, ListItemIcon, ListItemText, ListSubheader, useMediaQuery, useTheme } from "@mui/material";
 
 const Nav = ({ smallScreen, close = () => { } }) => {
   const links = [
-    { label: 'Portfolio', link: '/' },
-    { label: 'Market', link: '/market' },
-    { label: 'Trade', link: '/trade' },
-    { label: 'Funding', link: '/funding' },
-    { label: 'Notifications', link: '/notification' },
+    { label: 'Portfolio', link: '/', icon: <FolderIcon/> },
+    { label: 'Market', link: '/market', icon: <TimelineIcon/> },
+    { label: 'Trade', link: '/trade', icon: <SyncAltIcon/>},
+    { label: 'Funding', link: '/funding', icon: <AccountBalanceIcon/> },
+    { label: 'Notifications', link: '/notification', icon: <NotificationsIcon/> },
   ]
   if (smallScreen) {
     return (<Box sx={{ width: '100vw', pt: 2 }}>
@@ -39,8 +43,9 @@ const Nav = ({ smallScreen, close = () => { } }) => {
 
         </ListSubheader>
 
-        {links.map(({ label, link }) => (
+        {links.map(({ label, link, icon }) => (
           <ListItemButton key={label} component={NavLink} to={link} onClick={close}>
+            <ListItemIcon>{icon}</ListItemIcon>
             <ListItemText primary={label} />
           </ListItemButton>))}
       </List></Box>)
@@ -51,14 +56,19 @@ const Nav = ({ smallScreen, close = () => { } }) => {
         sx={{ pt: 2 }}
         container alignContent="stretch"
       >
-        {links.map(({ label, link }) => (
+        {links.map(({ label, link, icon }) => (
           <Grid key={label}>
-
-            <Button sx={{ p: 2, fontWeight: 500 }} component={NavLink} size="large"
-              to={link}>{label}</Button>
+            <NavLink to={link}>
+              {({isActive}) => (
+               <Button
+               startIcon={icon} 
+               sx={{ p: 2, fontWeight: 500, borderRadius:0, borderBottom: (isActive ? 3:0), borderBottomColor: 'primary.main' }}  
+               size="large">{label}</Button>
+              )}
+            </NavLink>
           </Grid>))}
       </Grid>
-      <Divider />
+      
     </nav>)
   }
 }

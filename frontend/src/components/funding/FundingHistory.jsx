@@ -1,16 +1,22 @@
 import {
+  Chip,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TableRow
+  TableRow,
+  Tooltip,
+  Typography
 } from "@mui/material";
 import {useEffect, useState} from "react";
 import {getTransactions} from "../../services/transaction.service";
 import {formatAmount} from "../../utils/number.utils";
 import ContentBox from "../layout/ContentBox";
 import Loading from "../layout/Loading";
+import LogoutIcon from '@mui/icons-material/Logout';
+import LoginIcon from '@mui/icons-material/Login';
+import moment from "moment";
 
 const FundingHistory = () => {
   const [transactions, setTransactions] = useState([])
@@ -21,16 +27,15 @@ const FundingHistory = () => {
     .then(({data}) => setTransactions(data.transactions))
     .finally(() => setLoading(false))
   }, [])
-  return (<>
-        {loading && <Loading/>}
-        {!loading && (
+  return (
+        <Loading loading={loading}>
             <TableContainer component={ContentBox} title="Transfer history">
               <Table>
 
                 <TableHead>
                   <TableRow>
                     <TableCell>Date</TableCell>
-                    <TableCell>Type</TableCell>                    
+                    
                     <TableCell>Amount</TableCell>
                   </TableRow>
                 </TableHead>
@@ -38,18 +43,26 @@ const FundingHistory = () => {
                   {
                     transactions.map(row => (
                         <TableRow key={row.createdAt}>
-                          <TableCell>{new Date(
-                              row.createdAt).toLocaleDateString()}</TableCell>
-                          <TableCell>{row.type}</TableCell>                          
-                          <TableCell>{row.toCurrency} {formatAmount(row.toAmount)}</TableCell>
+                          <TableCell>
+                          <Typography> {moment(row.createdAt).format('ll')}  
+                          </Typography>
+                          </TableCell>                          
+                          <TableCell>
+                            <Typography>
+                            {row.type==='DEPOSIT' && (<Tooltip title='Deposit'><LogoutIcon sx={{verticalAlign:'top', mr: 2}}/></Tooltip> )}
+                            {row.type==='WITHDRAWAL' && (<Tooltip title='Withdrawal'><LoginIcon sx={{verticalAlign:'top', mr: 2}}/></Tooltip> )}
+                            {row.toCurrency} {formatAmount(row.toAmount)}
+                            </Typography>
+                                                  
+                            
+                            </TableCell>
                         </TableRow>
                     ))
                   }
                 </TableBody>
               </Table>
             </TableContainer>
-        )}
-      </>
+        </Loading>
   );
 }
 

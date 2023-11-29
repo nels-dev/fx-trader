@@ -1,9 +1,9 @@
 import {Box, CircularProgress} from "@mui/material";
 
-const Loading = () => {
-  return (<Box sx={{p: 15, display: 'flex', justifyContent: 'center'}}>
+const Loading = ({children, loading}) => {
+  return loading ? (<Box sx={{p: 15, display: 'flex', justifyContent: 'center'}}>
     <CircularProgress/>
-  </Box>);
+  </Box>) : children;
 }
 
 export default Loading;

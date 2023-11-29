@@ -10,6 +10,7 @@ import Loading from "../layout/Loading"
 import {Link, useNavigate} from "react-router-dom";
 import FolderSpecialIcon from '@mui/icons-material/FolderSpecial';
 import PortfolioChart from "./PortfolioChart";
+import moment from "moment";
 
 const PortfolioSummary = () => {
   const [portf, setPortf] = useState(null)
@@ -30,9 +31,9 @@ const PortfolioSummary = () => {
     })
     .finally(() => setLoading(false))
   }, [])
-  return (<>
-    {loading && (<Loading/>)}
-    {!loading && portf && (
+  return (
+    <Loading loading={loading}>
+    {portf && (
         (<section>
         <Box sx={{mt:3}}>
           <Grid container spacing={3}>
@@ -48,8 +49,8 @@ const PortfolioSummary = () => {
                             sx={{mt: 2, mb: 2}}>{portf.percentageChange >= 0
                     ? "+" : ""}{Number(portf.percentageChange * 100).toFixed(
                     2)}%</Typography>
-                <Typography variant="subtitle2">Holding Period Return since {new Date(
-                    portf.createdAt).toLocaleDateString()}</Typography>
+                <Typography variant="subtitle2">Holding Period Return since {moment(
+                    portf.createdAt).format('ll')}</Typography>
                 <Stack spacing={2} direction="row" sx={{mt: 5}}>
                   <Button variant="contained" color='primary' component={Link}
                           to="/trade">Perform trade</Button>
@@ -98,7 +99,7 @@ const PortfolioSummary = () => {
           </Grid>
         </section>
     )}
-  </>)
+  </Loading>)
 }
 
 export default PortfolioSummary;

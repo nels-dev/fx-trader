@@ -1,4 +1,4 @@
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import LoginIcon from '@mui/icons-material/LoginOutlined';
 import LogoutIcon from '@mui/icons-material/LogoutOutlined';
 import {
     Button,
@@ -7,7 +7,9 @@ import {
     InputLabel,
     MenuItem,
     Select,
+    Stack,
     TextField,
+    Tooltip,
     Typography
 } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
@@ -109,7 +111,7 @@ const PerformFunding = () => {
             <Card sx={{backgroundColor: 'primary.light', height: "100%"}}
                   onClick={() => setSelectedType('DEPOSIT')}>
               <CardActionArea sx={{p: 3, textAlign: 'center', height: "100%"}}>
-                <AccountBalanceWalletIcon
+                <LoginIcon
                     sx={{fontSize: 60, color: "primary.contrastText"}}/>
 
                 <Typography gutterBottom variant="h4"
@@ -128,7 +130,7 @@ const PerformFunding = () => {
           <Grid xs={12} md={5}>
             <Card variant="outlined" sx={{textAlign: 'center', height: "100%"}}
                   onClick={() => setSelectedType('WITHDRAWAL')}>
-              <CardActionArea sx={{p: 3, textAlign: 'center'}}>
+              <CardActionArea sx={{p: 3, textAlign: 'center'}}>                
                 <LogoutIcon sx={{fontSize: 60, color: "primary.main"}}/>
 
                 <Typography gutterBottom variant="h4" color="primary">Withdraw
@@ -165,11 +167,11 @@ const PerformFunding = () => {
           <Grid xs={12} md={8}>
             <ContentBox title='Add Fund'>
               <form onSubmit={submitDeposit}>
+                <Stack spacing={2}>
                 <InputLabel id="label-currency">Currency</InputLabel>
                 <Select
                     labelId="label-currency"
 
-                    label="Currency"
                     fullWidth
                     value={form.currency}
                     onChange={({target: {value}}) => setForm(
@@ -178,23 +180,26 @@ const PerformFunding = () => {
                   {allowedCurrencies.map(cur => (
                       <MenuItem key={cur} value={cur}>{cur}</MenuItem>))}
                 </Select>
+                <InputLabel id="label-amount">Amount</InputLabel>
                 <TextField
                     margin="normal"
                     required
                     fullWidth
-                    label="Amount"
                     value={form.amount}
                     onChange={({target: {value}}) => setForm(
                         {...form, amount: Number(value)})}
                 />
-                <Button type='submit' variant="contained" color="primary"
-                        onClick={submitDeposit}
-                        sx={{mr: 3, mt: 3}}>Submit</Button>
-                {!preCreate && (
-                    <Button variant="outlined" color="primary"
-                            onClick={() => setSelectedType(null)}
-                            sx={{mr: 3, mt: 3}}>Cancel</Button>
-                )}
+                <div>
+                  <Button type='submit' variant="contained" color="primary"
+                          onClick={submitDeposit}
+                          sx={{mr: 3}}>Submit</Button>
+                  {!preCreate && (
+                      <Button variant="outlined" color="primary"
+                              onClick={() => setSelectedType(null)}
+                              sx={{mr: 3}}>Cancel</Button>
+                  )}
+                </div>
+                </Stack>
               </form>
             </ContentBox>
           </Grid>
@@ -212,6 +217,7 @@ const PerformFunding = () => {
           <Grid xs={12} md={8}>
             <ContentBox title="Withdraw from Balances">
               <form onSubmit={submitWithdrawal}>
+              <Stack spacing={2}>
                 <InputLabel id="label-currency">Currency</InputLabel>
                 <Select
                     labelId="label-currency"
@@ -226,21 +232,24 @@ const PerformFunding = () => {
                   {Object.keys(portf.balances).map(cur => (
                       <MenuItem key={cur} value={cur}>{cur}</MenuItem>))}
                 </Select>
+                <InputLabel id="label-amount">Amount</InputLabel>
                 <TextField
                     margin="normal"
                     required
                     fullWidth
-                    label="Amount"
                     value={form.amount}
                     onChange={({target: {value}}) => setForm(
                         {...form, amount: Number(value)})}
                 />
+                <div>
                 <Button type='submit' variant="contained" color="primary"
                         onClick={submitWithdrawal}
-                        sx={{mr: 3, mt: 3}}>Submit</Button>
+                        sx={{mr: 3}}>Submit</Button>
                 <Button variant="outlined" color="primary"
                         onClick={() => setSelectedType(null)}
-                        sx={{mr: 3, mt: 3}}>Cancel</Button>
+                        sx={{mr: 3}}>Cancel</Button>
+                        </div>
+                        </Stack>
               </form>
             </ContentBox>
           </Grid>

@@ -1,4 +1,4 @@
-import { Box, Card, CardContent, FormControlLabel, Grid, MenuItem, Select, Switch, TextField, ToggleButton, ToggleButtonGroup, Typography, Button, Chip, Stack } from "@mui/material";
+import { Box, Card, CardContent, FormControlLabel, Grid, MenuItem, Select, Switch, TextField, ToggleButton, ToggleButtonGroup, Typography, Button, Chip, Stack, Alert } from "@mui/material";
 import ContentBox from "../layout/ContentBox";
 import { useEffect, useState } from "react";
 import { getAllQuote, getQuote } from "@/services/transaction.service";
@@ -93,6 +93,13 @@ const Notifications = () => {
               </CardContent>
             </Card>
           ))}
+          {rules.length==0 && (
+            <>
+            <Alert variant="outlined" severity="info">
+              Currently, you haven't set up a notification rule. We recommend creating one to allow the platform to efficiently monitor updates for you!
+            </Alert>
+          </>
+          )}
             </Stack>
         
       </Grid>

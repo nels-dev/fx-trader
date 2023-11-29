@@ -64,7 +64,7 @@ const Register = () => {
                        alignItems: 'center',
                        justifyContent: 'center',
                        flexDirection: 'column',
-                       height: '100vh'
+                       height: '100%'
                      }}>
     <Paper sx={{
       display: 'flex',
