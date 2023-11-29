@@ -36,13 +36,14 @@ export class ApplicationStack extends cdk.Stack {
     cluster.addCapacity('DefaultAutoScalingGroup', {
       instanceType: new ec2.InstanceType('t2.micro'),
       desiredCapacity: 1,
-      maxCapacity:1,
+      maxCapacity:2,
       minCapacity:0,
       allowAllOutbound: true,
       updatePolicy: UpdatePolicy.rollingUpdate({
         minInstancesInService: 1,
         maxBatchSize: 1,
         minSuccessPercentage: 0,
+        waitOnResourceSignals: true
       })
     })
 
@@ -95,7 +96,8 @@ export class ApplicationStack extends cdk.Stack {
         }
       ],
       environment:{
-        "MONGODB_PASSWORD": process.env.MONGO_PASSWORD || ''
+        "MONGODB_PASSWORD": process.env.MONGO_PASSWORD || '',
+        "EMAIL_APIKEY": process.env.EMAIL_APIKEY || ''
       },
       logging: LogDriver.awsLogs({streamPrefix: 'backend', logGroup: new LogGroup(this, 'ApplicationLogGroup', {logGroupName: '/app/FxAssistBackend', retention: RetentionDays.FIVE_DAYS, removalPolicy: RemovalPolicy.DESTROY})})
     })

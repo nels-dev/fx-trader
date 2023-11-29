@@ -1,5 +1,6 @@
 package com.github.nelsdev.fxassist.user.service;
 
+import com.github.nelsdev.fxassist.common.exception.ResourceNotFoundException;
 import com.github.nelsdev.fxassist.config.JwtConfig;
 import com.github.nelsdev.fxassist.user.dto.LoginRequest;
 import com.github.nelsdev.fxassist.user.dto.LoginResponse;
@@ -85,9 +86,17 @@ public class UserService implements UserDetailsService {
         .orElseThrow(() -> new UsernameNotFoundException("User not found"));
   }
 
+  public void saveUser(User user) {
+    userRepository.save(user);
+  }
+
   public User getCurrentUser() {
     return userRepository
         .findByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
         .orElse(null);
+  }
+
+  public User getById(String id) {
+    return userRepository.findById(id).orElseThrow(ResourceNotFoundException::new);
   }
 }

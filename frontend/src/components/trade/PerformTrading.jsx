@@ -227,7 +227,7 @@ const PerformTrading = () => {
             <FormControlLabel control={ <Checkbox
               checked = {recordTrade}
               onChange = {()=> setRecordTrade(!recordTrade)}
-            />} label="I want to record a previous trade"/>
+            />} label="I want to record a trade already performed"/>
             {quote && (
               <Box sx={{ mt: 2, mb: 2 }}>
               <Typography variant="body1">{recordTrade ? 'Exchange rate implied from my input' : 'Real time exchange rate'}</Typography>

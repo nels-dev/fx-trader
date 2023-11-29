@@ -30,8 +30,7 @@ const FundingHistory = () => {
                 <TableHead>
                   <TableRow>
                     <TableCell>Date</TableCell>
-                    <TableCell>Type</TableCell>
-                    <TableCell>Currency</TableCell>
+                    <TableCell>Type</TableCell>                    
                     <TableCell>Amount</TableCell>
                   </TableRow>
                 </TableHead>
@@ -41,9 +40,8 @@ const FundingHistory = () => {
                         <TableRow key={row.createdAt}>
                           <TableCell>{new Date(
                               row.createdAt).toLocaleDateString()}</TableCell>
-                          <TableCell>{row.type}</TableCell>
-                          <TableCell>{row.toCurrency}</TableCell>
-                          <TableCell>{formatAmount(row.toAmount)}</TableCell>
+                          <TableCell>{row.type}</TableCell>                          
+                          <TableCell>{row.toCurrency} {formatAmount(row.toAmount)}</TableCell>
                         </TableRow>
                     ))
                   }

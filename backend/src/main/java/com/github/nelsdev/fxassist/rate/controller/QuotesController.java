@@ -1,6 +1,7 @@
 package com.github.nelsdev.fxassist.rate.controller;
 
 import com.github.nelsdev.fxassist.common.types.Currency;
+import com.github.nelsdev.fxassist.rate.dto.PredictionResponse;
 import com.github.nelsdev.fxassist.rate.dto.QuoteHistoryResponse;
 import com.github.nelsdev.fxassist.rate.dto.QuoteResponse;
 import com.github.nelsdev.fxassist.rate.entity.Quote;
@@ -27,6 +28,11 @@ public class QuotesController {
   @GetMapping("/history/{ccy}")
   public QuoteHistoryResponse getHistory(@PathVariable Currency ccy) {
     return rateService.getHistory(ccy);
+  }
+
+  @GetMapping("/prediction/{ccy}")
+  public PredictionResponse getPrediction(@PathVariable Currency ccy) {
+    return rateService.getPrediction(ccy);
   }
 
   @GetMapping()

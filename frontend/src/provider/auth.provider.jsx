@@ -14,6 +14,15 @@ const AuthProvider = ({children}) => {
   useEffect(() => {
     if (token) {
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`
+      api.interceptors.response.use(response=> {
+        return response;
+      }, error=> {
+        if(error.response.status===401){
+          delete api.defaults.headers.common['Authorization'];
+          localStorage.removeItem('token')
+        }
+        return Promise.reject(error);
+      })
       localStorage.setItem('token', token)
     } else {
       delete api.defaults.headers.common['Authorization'];

@@ -6,7 +6,6 @@ import Footer from "./Footer";
 const UserLayout = () => {
   return (<>
     <Header/>
-    <Nav/>
     <Outlet/>
   </>);
 }

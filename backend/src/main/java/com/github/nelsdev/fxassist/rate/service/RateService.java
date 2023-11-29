@@ -1,15 +1,19 @@
 package com.github.nelsdev.fxassist.rate.service;
 
+import com.github.nelsdev.fxassist.common.exception.ResourceNotFoundException;
 import com.github.nelsdev.fxassist.common.types.Currency;
+import com.github.nelsdev.fxassist.rate.dto.PredictionResponse;
 import com.github.nelsdev.fxassist.rate.dto.QuoteHistoryResponse;
 import com.github.nelsdev.fxassist.rate.dto.QuoteHistoryResponse.QuoteHistory;
 import com.github.nelsdev.fxassist.rate.dto.QuoteResponse;
 import com.github.nelsdev.fxassist.rate.entity.Quote;
+import com.github.nelsdev.fxassist.rate.repository.PredictionRepository;
 import com.github.nelsdev.fxassist.rate.repository.QuoteHistoryRepository;
 import com.github.nelsdev.fxassist.rate.repository.QuoteRepository;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
@@ -29,6 +33,7 @@ public class RateService {
   public static final int CACHE_EXPIRY_SECONDS = 300;
   private final QuoteRepository quoteRepository;
   private final QuoteHistoryRepository quoteHistoryRepository;
+  private final PredictionRepository predictionRepository;
 
   private static final Map<Currency, Pair<Quote, Instant>> CACHE = new ConcurrentHashMap<>();
 
@@ -78,6 +83,20 @@ public class RateService {
                         quoteHistory.getUpdated(), quoteHistory.getRates().get(0).getRate()))
             .collect(Collectors.toList());
     return QuoteHistoryResponse.builder().quoteHistory(history).build();
+  }
+
+  public PredictionResponse getPrediction(Currency currency) {
+    return predictionRepository
+        .findFirstByCurrencyOrderByDateDesc(currency)
+        .map(
+            prediction -> {
+              return PredictionResponse.builder()
+                  .predictedZScore(prediction.getPrediction())
+                  .date(prediction.getDate().atOffset(ZoneOffset.UTC).toLocalDate())
+                  .currency(prediction.getCurrency())
+                  .build();
+            })
+        .orElseThrow(ResourceNotFoundException::new);
   }
 
   public List<Quote> getQuotes() {
