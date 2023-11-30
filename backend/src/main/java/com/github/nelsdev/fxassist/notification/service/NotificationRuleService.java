@@ -131,12 +131,8 @@ public class NotificationRuleService {
                <p>Hi %s, This is a notification sent by FXAssist platform.</p>
                <p>
                 Currency Pair: <strong>%s/%s</strong><br/>
-                Current Price: <strong>%s</strong>
-                Your Target Price: <strong>%s</strong>
-               </p>
-               <p>
-                The notification rule is now deactivated and will be reactivated when the price reaches %s
-                
+                Current Price: <strong>%s</strong><br/>
+                Your Target Price: <strong>%s</strong><br/>
                </p>
                <p>Thank you for using FXAssist!</p>
                <hr/>
