@@ -144,8 +144,7 @@ public class NotificationRuleService {
                     rule.getBuyCurrency(),
                     rule.getSellCurrency(),
                     quote.getRate().setScale(4, RoundingMode.HALF_UP).toPlainString(),
-                    rule.getTarget().setScale(4, RoundingMode.HALF_UP).toPlainString(),
-                    rule.getReactivate().setScale(4, RoundingMode.HALF_UP).toPlainString()))
+                    rule.getTarget().setScale(4, RoundingMode.HALF_UP).toPlainString()))
             .build();
     if (!user.isEmailRegisteredWithBrevo()) {
       emailClient.registerContact(
