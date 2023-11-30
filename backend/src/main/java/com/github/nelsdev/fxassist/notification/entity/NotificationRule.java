@@ -22,6 +22,7 @@ public class NotificationRule {
   Instant lastTriggeredAt;
   Integer timesTriggered;
   boolean active;
+  boolean oneTime;
 
   @Getter
   public enum TargetType {

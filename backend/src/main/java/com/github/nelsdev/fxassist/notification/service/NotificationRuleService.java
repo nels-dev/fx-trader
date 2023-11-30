@@ -47,6 +47,7 @@ public class NotificationRuleService {
     rule.setCreatedAt(Instant.now());
     rule.setUserId(userId);
     rule.setTimesTriggered(0);
+    rule.setOneTime(request.isOneTime());
     repository.save(rule);
   }
 
@@ -80,6 +81,7 @@ public class NotificationRuleService {
                                 .orElse(null))
                         .targetType(rule.getTargetType().getCodeValue())
                         .timesTriggered(rule.getTimesTriggered())
+                        .oneTime(rule.isOneTime())
                         .build())
             .toList();
 
@@ -172,6 +174,7 @@ public class NotificationRuleService {
   }
 
   private void reactivateRule(NotificationRule rule) {
+    if(rule.isOneTime()) return;
     QuoteResponse quote = rateService.getQuote(rule.getSellCurrency(), rule.getBuyCurrency());
     if (rule.getTargetType() == TargetType.UPPER) {
       // reactivate when actual falls below threshold

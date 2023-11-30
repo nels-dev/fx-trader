@@ -26,5 +26,6 @@ public class NotificationRulesResponse {
     OffsetDateTime lastTriggeredAt;
     Integer timesTriggered;
     boolean active;
+    boolean oneTime;
   }
 }

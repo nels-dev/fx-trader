@@ -16,4 +16,5 @@ public class AddNotificationRuleRequest {
   String targetType;
   BigDecimal target;
   BigDecimal reactivate;
+  boolean oneTime;
 }

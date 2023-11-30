@@ -1,4 +1,4 @@
-import { Box, Card, CardContent, FormControlLabel, Grid, MenuItem, Select, Switch, TextField, ToggleButton, ToggleButtonGroup, Typography, Button, Chip, Stack, Alert } from "@mui/material";
+import { Box, Card, CardContent, FormControlLabel, Grid, MenuItem, Select, Switch, TextField, ToggleButton, ToggleButtonGroup, Typography, Button, Chip, Stack, Alert, Checkbox } from "@mui/material";
 import ContentBox from "../layout/ContentBox";
 import { useEffect, useState } from "react";
 import { getAllQuote, getQuote } from "@/services/transaction.service";
@@ -11,7 +11,7 @@ const Notifications = () => {
   const [allQuotes, setAllQuotes] = useState([])
   const [refresh, setRefresh] = useState(new Date())
   const [rules, setRules] = useState([])
-  const [form, setForm] = useState({ buyCurrency: undefined, sellCurrency: undefined, target: undefined, reactivate: undefined, referenceRate: undefined, targetType: 'upper' })
+  const [form, setForm] = useState({ buyCurrency: undefined, sellCurrency: undefined, target: undefined, reactivate: undefined, referenceRate: undefined, targetType: 'upper', oneTime: true })
   useEffect(() => {
     getAllQuote()
       .then(({ data }) => setAllQuotes(data))
@@ -54,7 +54,7 @@ const Notifications = () => {
       setRefresh(new Date())
     })
   }
-  const clear = ()=>{setForm({buyCurrency: undefined, sellCurrency: undefined, target: undefined, reactivate: undefined, referenceRate: undefined, targetType: 'upper' })}
+  const clear = ()=>{setForm({buyCurrency: undefined, sellCurrency: undefined, target: undefined, reactivate: undefined, referenceRate: undefined, targetType: 'upper', oneTime: true })}
   return (<Box sx={{ mt: 3, mb: 3 }}>
     <Grid container spacing={3} direction='row-reverse'>
       
@@ -67,9 +67,11 @@ const Notifications = () => {
                 <Grid container spacing={2}>
                   <Grid item xs sm={6}>
                     <Stack direction="column" spacing={2}>
-                      <Typography variant="body1" >Notify when {rule.sellCurrency}/{rule.buyCurrency} is</Typography>
+                      <Typography variant="body1" >Notify {rule.oneTime && 'once'} when {rule.sellCurrency}/{rule.buyCurrency} is</Typography>
                       <Typography variant="h5" >{rule.targetType==='upper' ? 'Above':'Below'} {Number(rule.target).toFixed(4)} </Typography>
-                      <Typography variant="subtitle2" >and reactivate when {rule.targetType==='upper' ? 'drops below':'rise above'} {Number(rule.reactivate).toFixed(4)} </Typography>
+                      {!rule.oneTime && (
+                        <Typography variant="subtitle2" >and reactivate when {rule.targetType==='upper' ? 'drops below':'rise above'} {Number(rule.reactivate).toFixed(4)} </Typography>
+                      )}
                       
                     </Stack>
                   
@@ -150,6 +152,13 @@ const Notifications = () => {
                 onChange={({ target: { value } }) => setForm({ ...form, target: value })}
               />
 
+              <FormControlLabel control={ <Checkbox
+                checked = {!form.oneTime}
+                onChange = {()=> setForm({...form, oneTime: !form.oneTime})}
+              />} label="Allow continuous monitoring"/>
+
+              {!form.oneTime && (<>
+                
               <Typography gutterBottom variant="body1" sx={{ mt: 3 }}>Reactivate the rule when {form.sellCurrency}/{form.buyCurrency} <strong>{form.targetType==='upper' ? 'drops below':'rises above'}</strong></Typography>
 
               <TextField
@@ -161,6 +170,8 @@ const Notifications = () => {
                 value={form.reactivate}
                 onChange={({ target: { value } }) => setForm({ ...form, reactivate: value })}
               />
+              </>
+              )}
 
 
 
